@@ -69,7 +69,7 @@ print(f"MAIL_DEFAULT_SENDER: {app.config.get('MAIL_DEFAULT_SENDER')}")
 print("=" * 60)
 
 # Database file path
-DATABASE = os.path.join(PROJECT_ROOT, 'data', 'student_health.db')
+DATABASE = "postgresql://healthrecordsystem_user:PKoL65UbJ9pZTgdqM0KcVH0sooZGInYS@dpg-d5o4fvi4d50c73c1uc80-a.singapore-postgres.render.com/healthrecordsystem"
 DOCUMENTS_DIR = os.path.join(PROJECT_ROOT, 'documents')
 PROFILE_PICS_DIR = os.path.join(PROJECT_ROOT, 'static', 'profile_pics')
 
@@ -5847,4 +5847,5 @@ def deworming_section_print(section):
 # ---------------------- MAIN ---------------------- #
 
 if __name__ == "__main__":
+
     app.run(debug=True, host="0.0.0.0", port=5000)
