@@ -1,0 +1,1069 @@
+<!-- htmlhint attr-unsafe-chars:false -->
+{% extends "shared/base.html" %}
+
+{% block title %}BMI Records by Section{% endblock %}
+
+{% block extra_css %}
+<style>
+  .section-container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 2rem;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .section-header h1 {
+    margin: 0;
+    color: #333;
+    font-size: 32px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn-action-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-size: 14px;
+  }
+
+  .btn-primary {
+    background: #a83e51;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #8a3243;
+  }
+
+  .btn-secondary {
+    background: #667eea;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: #5568d3;
+  }
+
+  .btn-info {
+    background: #17a2b8;
+    color: white;
+  }
+
+  .btn-info:hover {
+    background: #138496;
+  }
+
+  .section-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .section-card {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .section-card:hover {
+    border-color: #a83e51;
+    box-shadow: 0 4px 12px rgba(168, 62, 81, 0.15);
+  }
+
+  .section-card.active {
+    border-color: #a83e51;
+    background: #f8f9fa;
+    box-shadow: 0 4px 12px rgba(168, 62, 81, 0.2);
+  }
+
+  .section-card h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1.1rem;
+  }
+
+  .section-count {
+    display: inline-block;
+    background: #a83e51;
+    color: white;
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .records-section {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: none;
+  }
+
+  .records-section.active {
+    display: block;
+  }
+
+  .records-section h2 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 3px solid #a83e51;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .gender-section {
+    margin-bottom: 3rem;
+  }
+
+  .gender-section h3 {
+    background: #a83e51;
+    color: white;
+    padding: 1rem;
+    border-radius: 4px;
+    margin: 0 0 1.5rem 0;
+    font-size: 1.1rem;
+  }
+
+  .bmi-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .bmi-table thead {
+    background: #f8f9fa;
+  }
+
+  .bmi-table th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #dee2e6;
+  }
+
+  .bmi-table td {
+    padding: 12px;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .bmi-table tbody tr:hover {
+    background: #f5f5f5;
+  }
+
+  .bmi-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .bmi-normal {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .bmi-underweight {
+    background: #d1ecf1;
+    color: #0c5460;
+  }
+
+  .bmi-overweight {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  .bmi-obese {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 5px;
+  }
+
+  .btn-small {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .btn-view {
+    background: #17a2b8;
+    color: white;
+  }
+
+  .btn-view:hover {
+    background: #138496;
+  }
+
+  .btn-edit {
+    background: #667eea;
+    color: white;
+  }
+
+  .btn-edit:hover {
+    background: #5568d3;
+  }
+
+  .btn-delete {
+    background: #dc3545;
+    color: white;
+  }
+
+  .btn-delete:hover {
+    background: #c82333;
+  }
+
+  .no-records {
+    text-align: center;
+    padding: 3rem;
+    color: #999;
+    background: #f9f9f9;
+    border-radius: 4px;
+    border: 1px dashed #ddd;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem;
+    color: #999;
+  }
+
+  .empty-state i {
+    font-size: 48px;
+    color: #ddd;
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .modal.show {
+    display: block;
+  }
+
+  .modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 0;
+    border: 1px solid #888;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 700px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1001;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    color: #333;
+  }
+
+  .close {
+    color: #aaa;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .close:hover {
+    color: black;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #ddd;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    background: white;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .btn-modal {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .btn-modal-primary {
+    background: #a83e51;
+    color: white;
+  }
+
+  .btn-modal-primary:hover {
+    background: #8a3243;
+  }
+
+  .btn-modal-secondary {
+    background: #e9ecef;
+    color: #333;
+  }
+
+  .btn-modal-secondary:hover {
+    background: #dee2e6;
+  }
+
+  .view-field {
+    margin-bottom: 1.5rem;
+  }
+
+  .view-field label {
+    font-weight: 600;
+    color: #666;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+  }
+
+  .view-field p {
+    margin: 0.5rem 0 0 0;
+    color: #333;
+    font-size: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .section-list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="section-container">
+  <div class="section-header">
+    <h1>📚 BMI Records by Section</h1>
+    <div class="header-actions">
+      <button class="btn btn-primary" onclick="openAddModal()">
+        <i class="bx bx-plus"></i> Add Record
+      </button>
+    </div>
+  </div>
+
+  {% if sections %}
+  <div class="section-list">
+    {% for section in sections %}
+    <div class="section-card {% if section == selected_section %}active{% endif %}"
+      onclick="selectSection('{{ section }}')">
+      <h3>{{ section }}</h3>
+      <span class="section-count">{{ section_counts.get(section, 0) }} records</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if selected_section and bmi_records %}
+  <div class="records-section active" id="recordsSection">
+    <h2>📋 Records for {{ selected_section }}</h2>
+    <div class="header-actions" style="margin-bottom: 1.5rem;">
+      <button class="btn btn-info" onclick="printSectionSF8('{{ selected_section }}')">
+        <i class="bx bx-printer"></i> Print SF8
+      </button>
+    </div>
+
+    <!-- MALE Section -->
+    <div class="gender-section">
+      <h3>👨 MALE</h3>
+      {% set male_records = bmi_records | selectattr('gender', 'equalto', 'Male') | list %}
+      {% if male_records %}
+      <table class="bmi-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Height (m)</th>
+            <th>Weight (kg)</th>
+            <th>BMI</th>
+            <th>Category</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in male_records %}
+          <tr>
+            <td>{{ record['name'] }}</td>
+            <td>{{ "%.2f"|format(record['height']) }}</td>
+            <td>{{ "%.1f"|format(record['weight']) }}</td>
+            <td>{{ "%.2f"|format(record['bmi']) if record['bmi'] else 'N/A' }}</td>
+            <td>
+              <span class="bmi-badge bmi-{{ record['bmi_category'].lower() }}">
+                {{ record['bmi_category'] }}
+              </span>
+            </td>
+            <td>{{ record['record_date'] }}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-small btn-view" onclick="viewRecord({{ record['id'] }})" title="View">
+                  <i class="bx bx-eye"></i>
+                </button>
+                <button class="btn-small btn-edit" onclick="openEditModal({{ record['id'] }})" title="Edit">
+                  <i class="bx bx-edit"></i>
+                </button>
+                <button class="btn-small btn-delete" onclick="deleteRecord({{ record['id'] }})" title="Delete">
+                  <i class="bx bx-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="no-records">No male records</div>
+      {% endif %}
+    </div>
+
+    <!-- FEMALE Section -->
+    <div class="gender-section">
+      <h3>👩 FEMALE</h3>
+      {% set female_records = bmi_records | selectattr('gender', 'equalto', 'Female') | list %}
+      {% if female_records %}
+      <table class="bmi-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Height (m)</th>
+            <th>Weight (kg)</th>
+            <th>BMI</th>
+            <th>Category</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in female_records %}
+          <tr>
+            <td>{{ record['name'] }}</td>
+            <td>{{ "%.2f"|format(record['height']) }}</td>
+            <td>{{ "%.1f"|format(record['weight']) }}</td>
+            <td>{{ "%.2f"|format(record['bmi']) if record['bmi'] else 'N/A' }}</td>
+            <td>
+              <span class="bmi-badge bmi-{{ record['bmi_category'].lower() }}">
+                {{ record['bmi_category'] }}
+              </span>
+            </td>
+            <td>{{ record['record_date'] }}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-small btn-view" onclick="viewRecord({{ record['id'] }})" title="View">
+                  <i class="bx bx-eye"></i>
+                </button>
+                <button class="btn-small btn-edit" onclick="openEditModal({{ record['id'] }})" title="Edit">
+                  <i class="bx bx-edit"></i>
+                </button>
+                <button class="btn-small btn-delete" onclick="deleteRecord({{ record['id'] }})" title="Delete">
+                  <i class="bx bx-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="no-records">No female records</div>
+      {% endif %}
+    </div>
+
+    <!-- NO GENDER SPECIFIED Section -->
+    {% set no_gender_records = bmi_records | rejectattr('gender') | list %}
+    {% if no_gender_records %}
+    <div class="gender-section">
+      <h3>❓ Gender Not Specified</h3>
+      <table class="bmi-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Height (m)</th>
+            <th>Weight (kg)</th>
+            <th>BMI</th>
+            <th>Category</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in no_gender_records %}
+          <tr>
+            <td>{{ record['name'] }}</td>
+            <td>{{ "%.2f"|format(record['height']) }}</td>
+            <td>{{ "%.1f"|format(record['weight']) }}</td>
+            <td>{{ "%.2f"|format(record['bmi']) if record['bmi'] else 'N/A' }}</td>
+            <td>
+              <span class="bmi-badge bmi-{{ record['bmi_category'].lower() }}">
+                {{ record['bmi_category'] }}
+              </span>
+            </td>
+            <td>{{ record['record_date'] }}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-small btn-view" onclick="viewRecord({{ record['id'] }})" title="View">
+                  <i class="bx bx-eye"></i>
+                </button>
+                <button class="btn-small btn-edit" onclick="openEditModal({{ record['id'] }})" title="Edit">
+                  <i class="bx bx-edit"></i>
+                </button>
+                <button class="btn-small btn-delete" onclick="deleteRecord({{ record['id'] }})" title="Delete">
+                  <i class="bx bx-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+  {% elif selected_section %}
+  <div class="no-records">
+    <i class="bx bx-inbox"></i>
+    <p>No BMI records found for {{ selected_section }}</p>
+  </div>
+  {% endif %}
+  {% else %}
+  <div class="empty-state">
+    <i class="bx bx-folder"></i>
+    <p>No sections available</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- View Modal -->
+<div id="viewModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>BMI Record Details</h3>
+      <button class="close" onclick="closeViewModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="viewModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" onclick="closeViewModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Modal -->
+<div id="addModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add BMI Record</h3>
+      <button class="close" onclick="closeAddModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="addForm">
+        <div class="form-group">
+          <label>Name <span style="color: #dc3545;">*</span></label>
+          <input type="text" name="student_name" id="addName" placeholder="Enter student name" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Section <span style="color: #dc3545;">*</span></label>
+            <input type="text" name="section" id="addSection" value="{{ selected_section or '' }}" required />
+          </div>
+          <div class="form-group">
+            <label>Gender</label>
+            <select name="gender" id="addGender">
+              <option value="">Select</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Strand</label>
+          <input type="text" name="strand" id="addStrand" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Record Date <span style="color: #dc3545;">*</span></label>
+            <input type="date" name="record_date" id="addRecordDate" required />
+          </div>
+          <div class="form-group">
+            <label>Semester <span style="color: #dc3545;">*</span></label>
+            <select name="semester" id="addSemester" required>
+              <option value="1st Semester">1st Semester</option>
+              <option value="2nd Semester">2nd Semester</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Height (m) <span style="color: #dc3545;">*</span></label>
+            <input type="number" name="height" id="addHeight" step="0.01" placeholder="e.g., 1.60" required />
+          </div>
+          <div class="form-group">
+            <label>Weight (kg) <span style="color: #dc3545;">*</span></label>
+            <input type="number" name="weight" id="addWeight" step="0.1" placeholder="e.g., 50.5" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nutritional Status</label>
+            <select name="nutritional_status" id="addNutritionalStatus">
+              <option value="">Select...</option>
+              <option value="Normal">Normal</option>
+              <option value="Overweight">Overweight</option>
+              <option value="Underweight">Underweight</option>
+              <option value="Obese">Obese</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Height for Age</label>
+            <select name="height_for_age" id="addHeightForAge">
+              <option value="">Select...</option>
+              <option value="Normal">Normal</option>
+              <option value="Stunted">Stunted</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Remarks</label>
+          <textarea name="remarks" id="addRemarks" style="min-height: 80px;"></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" onclick="closeAddModal()">Cancel</button>
+      <button class="btn-modal btn-modal-primary" onclick="submitAdd()">Add Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Edit BMI Record</h3>
+      <button class="close" onclick="closeEditModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="editForm">
+        <input type="hidden" id="editRecordId" />
+
+        <div class="form-group">
+          <label>Name <span style="color: #dc3545;">*</span></label>
+          <input type="text" id="editName" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Section</label>
+            <input type="text" id="editSection" />
+          </div>
+          <div class="form-group">
+            <label>Gender</label>
+            <select id="editGender">
+              <option value="">Select</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Strand</label>
+          <input type="text" id="editStrand" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Record Date <span style="color: #dc3545;">*</span></label>
+            <input type="date" id="editRecordDate" required />
+          </div>
+          <div class="form-group">
+            <label>Semester <span style="color: #dc3545;">*</span></label>
+            <select id="editSemester" required>
+              <option value="1st Semester">1st Semester</option>
+              <option value="2nd Semester">2nd Semester</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Height (m) <span style="color: #dc3545;">*</span></label>
+            <input type="number" id="editHeight" step="0.01" required />
+          </div>
+          <div class="form-group">
+            <label>Weight (kg) <span style="color: #dc3545;">*</span></label>
+            <input type="number" id="editWeight" step="0.1" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nutritional Status</label>
+            <select id="editNutritionalStatus">
+              <option value="">Select...</option>
+              <option value="Normal">Normal</option>
+              <option value="Overweight">Overweight</option>
+              <option value="Underweight">Underweight</option>
+              <option value="Obese">Obese</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Height for Age</label>
+            <select id="editHeightForAge">
+              <option value="">Select...</option>
+              <option value="Normal">Normal</option>
+              <option value="Stunted">Stunted</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Remarks</label>
+          <textarea id="editRemarks" style="min-height: 80px;"></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" onclick="closeEditModal()">Cancel</button>
+      <button class="btn-modal btn-modal-primary" onclick="submitEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function selectSection(section) {
+    window.location.href = `?section=${encodeURIComponent(section)}`;
+  }
+
+  function openAddModal() {
+    document.getElementById("addForm").reset();
+    document.getElementById("addModal").classList.add("show");
+  }
+
+  function closeAddModal() {
+    document.getElementById("addModal").classList.remove("show");
+  }
+
+  function openEditModal(recordId) {
+    fetch(`/api/bmi/${recordId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          const record = data.record;
+          document.getElementById("editRecordId").value = record.id;
+          document.getElementById("editName").value = record.name || "";
+          document.getElementById("editSection").value = record.section || "";
+          document.getElementById("editGender").value = record.gender || "";
+          document.getElementById("editStrand").value = record.strand || "";
+          document.getElementById("editRecordDate").value = record.record_date;
+          document.getElementById("editSemester").value = record.semester;
+          document.getElementById("editHeight").value = record.height;
+          document.getElementById("editWeight").value = record.weight;
+          document.getElementById("editNutritionalStatus").value = record.nutritional_status || "";
+          document.getElementById("editHeightForAge").value = record.height_for_age || "";
+          document.getElementById("editRemarks").value = record.remarks || "";
+          document.getElementById("editModal").classList.add("show");
+        } else {
+          alert("Error loading record: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("Error loading record");
+      });
+  }
+
+  function closeEditModal() {
+    document.getElementById("editModal").classList.remove("show");
+  }
+
+  function submitAdd() {
+    const formData = new FormData(document.getElementById("addForm"));
+
+    fetch("{{ url_for('bmi_add') }}", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alert("BMI record added successfully!");
+          closeAddModal();
+          location.reload();
+        } else {
+          alert("Error: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("An error occurred");
+      });
+  }
+
+  function submitEdit() {
+    const recordId = document.getElementById("editRecordId").value;
+    const formData = new FormData();
+    formData.append("name", document.getElementById("editName").value);
+    formData.append("section", document.getElementById("editSection").value);
+    formData.append("gender", document.getElementById("editGender").value);
+    formData.append("strand", document.getElementById("editStrand").value);
+    formData.append("record_date", document.getElementById("editRecordDate").value);
+    formData.append("semester", document.getElementById("editSemester").value);
+    formData.append("height", document.getElementById("editHeight").value);
+    formData.append("weight", document.getElementById("editWeight").value);
+    formData.append("nutritional_status", document.getElementById("editNutritionalStatus").value);
+    formData.append("height_for_age", document.getElementById("editHeightForAge").value);
+    formData.append("remarks", document.getElementById("editRemarks").value);
+
+    fetch(`/api/bmi/edit/${recordId}`, {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alert("BMI record updated successfully!");
+          closeEditModal();
+          location.reload();
+        } else {
+          alert("Error: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("An error occurred");
+      });
+  }
+
+  function viewRecord(recordId) {
+    fetch(`/api/bmi/${recordId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          const record = data.record;
+          const html = `
+            <div class="view-field">
+              <label>Student Name</label>
+              <p>${record.name}</p>
+            </div>
+            <div class="view-field">
+              <label>Section</label>
+              <p>${record.section || 'N/A'}</p>
+            </div>
+            <div class="view-field">
+              <label>Gender</label>
+              <p>${record.gender || 'N/A'}</p>
+            </div>
+            <div class="view-field">
+              <label>Strand</label>
+              <p>${record.strand || 'N/A'}</p>
+            </div>
+            <div class="view-field">
+              <label>Record Date</label>
+              <p>${record.record_date}</p>
+            </div>
+            <div class="view-field">
+              <label>Semester</label>
+              <p>${record.semester}</p>
+            </div>
+            <div class="view-field">
+              <label>Height (m)</label>
+              <p>${parseFloat(record.height).toFixed(2)}</p>
+            </div>
+            <div class="view-field">
+              <label>Weight (kg)</label>
+              <p>${parseFloat(record.weight).toFixed(1)}</p>
+            </div>
+            <div class="view-field">
+              <label>BMI</label>
+              <p>${parseFloat(record.bmi).toFixed(2)}</p>
+            </div>
+            <div class="view-field">
+              <label>BMI Category</label>
+              <p>${record.bmi_category}</p>
+            </div>
+            <div class="view-field">
+              <label>Nutritional Status</label>
+              <p>${record.nutritional_status || 'N/A'}</p>
+            </div>
+            <div class="view-field">
+              <label>Height for Age</label>
+              <p>${record.height_for_age || 'N/A'}</p>
+            </div>
+            <div class="view-field">
+              <label>Remarks</label>
+              <p>${record.remarks || 'None'}</p>
+            </div>
+          `;
+          document.getElementById("viewModalBody").innerHTML = html;
+          document.getElementById("viewModal").classList.add("show");
+        } else {
+          alert("Error: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("Error loading record");
+      });
+  }
+
+  function closeViewModal() {
+    document.getElementById("viewModal").classList.remove("show");
+  }
+
+  function deleteRecord(recordId) {
+    if (confirm("Are you sure you want to delete this record?")) {
+      fetch(`/bmi-delete/${recordId}`, {
+        method: "POST",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            alert("Record deleted successfully!");
+            location.reload();
+          } else {
+            alert("Error: " + data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("An error occurred");
+        });
+    }
+  }
+
+  function printSectionSF8(section) {
+    window.open(`/bmi-section-print/${encodeURIComponent(section)}`, '_blank');
+  }
+
+  // Close modal when clicking outside
+  window.onclick = function (event) {
+    let modal = document.getElementById("viewModal");
+    if (event.target === modal) {
+      closeViewModal();
+    }
+    modal = document.getElementById("editModal");
+    if (event.target === modal) {
+      closeEditModal();
+    }
+    modal = document.getElementById("addModal");
+    if (event.target === modal) {
+      closeAddModal();
+    }
+  };
+</script>
+{% endblock %}

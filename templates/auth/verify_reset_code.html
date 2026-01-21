@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Reset Code - LYFJSHS Health Record System</title>
+
+    <!-- Boxicons -->
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+
+    <style>
+      /* Flash Messages */
+      .flash-messages {
+        margin: 1rem 0;
+      }
+      .flash-message {
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+      .flash-success {
+        background-color: rgba(212, 237, 218, 0.9);
+        color: #155724;
+        border-left: 4px solid #28a745;
+      }
+      .flash-danger {
+        background-color: rgba(248, 215, 218, 0.9);
+        color: #721c24;
+        border-left: 4px solid #dc3545;
+      }
+      .flash-warning {
+        background-color: rgba(255, 243, 205, 0.9);
+        color: #856404;
+        border-left: 4px solid #ffc107;
+      }
+      .flash-info {
+        background-color: rgba(209, 236, 241, 0.9);
+        color: #0c5460;
+        border-left: 4px solid #17a2b8;
+      }
+
+      /* Form styling */
+      .form-group {
+        margin-bottom: 18px;
+        position: relative;
+      }
+
+      .form-group i {
+        position: absolute;
+        top: 50%;
+        left: 15px;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 18px;
+        transition: color 0.3s ease;
+      }
+
+      input[type="email"],
+      input[type="text"] {
+        width: 100%;
+        padding: 12px 12px 12px 45px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        font-size: 14px;
+        color: #fff;
+        outline: none;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+      }
+
+      input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      input:focus {
+        border-color: rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 0 15px rgba(106, 27, 42, 0.3),
+          inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      }
+
+      .form-group:has(input:focus) i {
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .verify-btn {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #6a1b2a 0%, #8b2340 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+
+      .verify-btn:hover {
+        background: linear-gradient(135deg, #7d1f33 0%, #9f2849 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(106, 27, 42, 0.3);
+      }
+
+      .verify-btn:active {
+        transform: translateY(0);
+      }
+
+      .signup-text {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 14px;
+        margin-top: 20px;
+      }
+
+      .signup-text a {
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+        border-bottom: 1px solid transparent;
+      }
+
+      .signup-text a:hover {
+        color: #fff;
+        border-bottom-color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="glassmorphism-card">
+        <div class="login-header">
+          <h1>LYFJSHS</h1>
+          <h3>Verify Reset Code</h3>
+          <p>Enter the code sent to your email</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+          <div class="flash-message flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %} {% endwith %}
+
+        <form method="POST">
+          <div class="form-group">
+            <i class="bx bx-envelope"></i>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Email Address"
+              value="{{ email }}"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <i class="bx bx-lock"></i>
+            <input
+              type="text"
+              id="reset_code"
+              name="reset_code"
+              placeholder="Enter 6-digit code"
+              maxlength="6"
+              pattern="[0-9]{6}"
+              inputmode="numeric"
+              required
+            />
+          </div>
+
+          <button type="submit" class="verify-btn">Verify Code</button>
+        </form>
+
+        <p class="signup-text">
+          <a href="{{ url_for('forgot_password') }}"
+            >Back to Forgot Password</a
+          >
+          |
+          <a href="{{ url_for('login') }}">Login</a>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

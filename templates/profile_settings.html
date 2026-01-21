@@ -1,0 +1,385 @@
+{% extends "shared/base.html" %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard.css') }}"
+/>
+<style>
+  .profile-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    background: white;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .profile-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid #f0f0f0;
+  }
+
+  .profile-pic-container {
+    margin-bottom: 1.5rem;
+  }
+
+  .profile-pic {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #a83e51;
+    display: block;
+    margin: 0 auto 1rem;
+    background: #f5f5f5;
+  }
+
+  .profile-pic-placeholder {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: #a83e51;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 3rem;
+    color: white;
+    border: 4px solid #a83e51;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #a83e51;
+
+  }
+
+  .form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  .file-input-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .file-input-label {
+    display: block;
+    padding: 1rem;
+    border: 2px dashed #a83e51;
+    border-radius: 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #f9f9f9;
+  }
+
+  .file-input-label:hover {
+    background: #f0f0f0;
+    border-color: #8f2f41;
+  }
+
+  .file-input-label i {
+    font-size: 1.5rem;
+    color: #8f2f41;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+
+  .button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    justify-content: center;
+  }
+
+  .btn {
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #a83e51 0%, #a83e51 100%);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: #f0f0f0;
+    color: #333;
+  }
+
+  .btn-secondary:hover {
+    background: #e0e0e0;
+  }
+
+  .info-box {
+   background: linear-gradient(135deg, rgba(255, 107, 157, 0.1), rgba(255, 139, 171, 0.1));
+    border-left: 4px solid #a83e51;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    color: #8f2f41;
+  }
+
+  .info-box i {
+    margin-right: 0.5rem;
+  }
+
+  @media (max-width: 600px) {
+    .profile-container {
+      padding: 1.5rem;
+    }
+
+    .button-group {
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<header class="header">
+  <h1>Profile Settings</h1>
+</header>
+
+<main class="main-content">
+  <div class="profile-container">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %}
+    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+    {% endfor %} {% endif %} {% endwith %}
+
+    <!-- Info Box -->
+    <div class="info-box">
+      <i class="bx bx-info-circle"></i>
+      Update your profile information and upload a profile picture. Your changes
+      will be visible across the system.
+    </div>
+
+    <form
+      method="POST"
+      enctype="multipart/form-data"
+      id="profileForm"
+      onsubmit="return validateProfileForm()"
+    >
+      <!-- Profile Header -->
+      <div class="profile-header">
+        <h2>{{ user.fullname or user.username }}</h2>
+        <p style="color: #666; margin: 0.5rem 0 0 0">@{{ user.username }}</p>
+      </div>
+
+      <!-- Profile Picture -->
+      <div class="profile-pic-container">
+        <label>Profile Picture</label>
+        {% if user.profile_pic %}
+        <img
+          src="{{ url_for('static', filename='profile_pics/' + user.profile_pic) }}"
+          alt="Profile"
+          class="profile-pic"
+        />
+        {% else %}
+        <div class="profile-pic-placeholder">
+          <i class="bx bx-user"></i>
+        </div>
+        {% endif %}
+
+        <div class="file-input-wrapper">
+          <label for="profile-pic" class="file-input-label">
+            <i class="bx bx-cloud-upload"></i>
+            <div>Click or drag to upload a new profile picture</div>
+            <small style="color: #999">JPG, PNG, GIF (Max 10MB)</small>
+          </label>
+          <input
+            type="file"
+            id="profile-pic"
+            name="profile_pic"
+            accept="image/jpeg,image/png,image/gif"
+          />
+        </div>
+      </div>
+
+      <!-- Full Name -->
+      <div class="form-group">
+        <label for="fullname"> <i class="bx bx-user"></i> Full Name </label>
+        <input
+          type="text"
+          id="fullname"
+          name="fullname"
+          value="{{ user.fullname or '' }}"
+          required
+          minlength="3"
+          maxlength="100"
+          pattern="[a-zA-Z\s]+"
+          title="Name should contain only letters and spaces"
+        />
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">
+          <i class="bx bx-envelope"></i> Email Address
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value="{{ user.email or '' }}"
+          required
+          maxlength="120"
+        />
+      </div>
+
+      <!-- Username (Read-only) -->
+      <div class="form-group">
+        <label for="username">
+          <i class="bx bx-at"></i> Username (Cannot be changed)
+        </label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          value="{{ user.username }}"
+          disabled
+          style="background: #f5f5f5; cursor: not-allowed"
+        />
+      </div>
+
+      <!-- Buttons -->
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="bx bx-check"></i> Save Changes
+        </button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+          <i class="bx bx-x"></i> Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</main>
+
+<script>
+  // Handle file input
+  const fileInput = document.getElementById("profile-pic");
+  const fileLabel = document.querySelector(".file-input-label");
+
+  fileLabel.addEventListener("click", () => fileInput.click());
+  fileLabel.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    fileLabel.style.background = "#e8e8ff";
+  });
+
+  fileLabel.addEventListener("dragleave", () => {
+    fileLabel.style.background = "#f9f9f9";
+  });
+
+  fileLabel.addEventListener("drop", (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      fileLabel.style.background = "#f9f9f9";
+    }
+  });
+
+  fileInput.addEventListener("change", (e) => {
+    if (e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = document.querySelector(".profile-pic");
+        if (img) {
+          img.src = event.target.result;
+        }
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  });
+
+  function validateProfileForm() {
+    const fullname = document.getElementById("fullname").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const profilePic = document.getElementById("profile-pic").files[0];
+
+    // Validate fullname
+    if (fullname.length < 3) {
+      alert("Full name must be at least 3 characters long");
+      return false;
+    }
+    if (!/^[a-zA-Z\s]+$/.test(fullname)) {
+      alert("Full name should contain only letters and spaces");
+      return false;
+    }
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert("Please enter a valid email address");
+      return false;
+    }
+
+    // Validate profile picture if one is selected
+    if (profilePic) {
+      const maxFileSize = 10 * 1024 * 1024; // 10 MB
+      const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+
+      if (profilePic.size > maxFileSize) {
+        alert("Profile picture must be less than 10 MB");
+        return false;
+      }
+      if (!allowedTypes.includes(profilePic.type)) {
+        alert("Profile picture must be JPG, PNG, or GIF");
+        return false;
+      }
+    }
+
+    return true;
+  }
+</script>
+{% endblock %}

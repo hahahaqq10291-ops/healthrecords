@@ -1,0 +1,1094 @@
+<!-- htmlhint attr-unsafe-chars:false -->
+{% extends "shared/base.html" %}
+
+{% block title %}Deworming Management{% endblock %}
+
+{% block extra_css %}
+<style>
+  .deworming-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+  }
+
+  .deworming-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .deworming-header h1 {
+    margin: 0;
+    color: #333;
+    font-size: 32px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn-add {
+    background: #a83e51;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .btn-add:hover {
+    background: #8a3243;
+  }
+
+  .btn-secondary {
+    background: #667eea;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .btn-secondary:hover {
+    background: #5568d3;
+  }
+
+  .deworming-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .deworming-table thead {
+    background: #f8f9fa;
+  }
+
+  .deworming-table th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #dee2e6;
+  }
+
+  .deworming-table td {
+    padding: 12px;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .deworming-table tbody tr:hover {
+    background: #f5f5f5;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .badge-yes {
+    background: #d1e7dd;
+    color: #0f5132;
+  }
+
+  .badge-no {
+    background: #f8d7da;
+    color: #842029;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 5px;
+  }
+
+  .btn-action {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: opacity 0.3s;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .btn-view {
+    background: #17a2b8;
+    color: white;
+  }
+
+  .btn-view:hover {
+    background: #138496;
+  }
+
+  .btn-edit {
+    background: #667eea;
+    color: white;
+  }
+
+  .btn-edit:hover {
+    background: #5568d3;
+  }
+
+  .btn-delete {
+    background: #dc3545;
+    color: white;
+  }
+
+  .btn-delete:hover {
+    background: #c82333;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 40px;
+    color: #999;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .empty-state i {
+    font-size: 48px;
+    color: #ddd;
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .empty-state p {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .alert {
+    padding: 12px 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+
+  .alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+
+  .alert-danger {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+
+  @media print {
+    body * {
+      display: none;
+    }
+
+    .deworming-container {
+      display: none;
+    }
+
+    .deworming-header {
+      display: none !important;
+    }
+
+    .deworming-table {
+      display: none !important;
+    }
+
+    #printContent {
+      display: block;
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+  }
+
+  .modal.show {
+    display: block;
+    pointer-events: auto;
+  }
+
+  .modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 0;
+    border: 1px solid #888;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 700px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-height: 85vh;
+    overflow-y: auto;
+    pointer-events: auto;
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1001;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    color: #333;
+  }
+
+  .close {
+    color: #aaa;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .close:hover {
+    color: black;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #ddd;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    position: sticky;
+    bottom: 0;
+    background: white;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .btn-modal {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .btn-modal-primary {
+    background: #a83e51;
+    color: white;
+  }
+
+  .btn-modal-primary:hover {
+    background: #8a3243;
+  }
+
+  .btn-modal-secondary {
+    background: #e9ecef;
+    color: #333;
+  }
+
+  .btn-modal-secondary:hover {
+    background: #dee2e6;
+  }
+
+  .view-field {
+    margin-bottom: 1.5rem;
+  }
+
+  .view-field label {
+    font-weight: 600;
+    color: #666;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+  }
+
+  .view-field p {
+    margin: 0.5rem 0 0 0;
+    color: #333;
+    font-size: 1rem;
+  }
+
+  .form-section {
+    background: #f9f9f9;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #a83e51;
+  }
+
+  .form-section h6 {
+    margin: 0 0 1rem 0;
+    color: #333;
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 768px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="deworming-container">
+  <div class="deworming-header">
+    <h1><i class='bx bx-virus'></i> Deworming Management</h1>
+    <div class="header-actions">
+      <button class="btn-add" onclick="openAddModal()">
+        <i class='bx bx-plus'></i> Add Record
+      </button>
+      <a href="{{ url_for('deworming_section_view') }}" class="btn-secondary">
+        <i class='bx bx-folder-open'></i> View by Section
+      </a>
+    </div>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  <div class="alert alert-{{ category }}">{{ message }}</div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+
+  {% if deworming_records %}
+  <table class="deworming-table">
+    <thead>
+      <tr>
+        <th>LRN</th>
+        <th>Name</th>
+        <th>Grade</th>
+        <th>Section</th>
+        <th>Gender</th>
+        <th>Recorded Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for record in deworming_records %}
+      <tr>
+        <td>{{ record['lrn'] or '-' }}</td>
+        <td>{{ record['name'] }}</td>
+        <td>{{ record['grade'] or '-' }}</td>
+        <td>{{ record['section'] }}</td>
+        <td>{{ record['gender'] or '-' }}</td>
+        <td>{{ record['recorded_date'] }}</td>
+        <td>
+          <div class="action-buttons">
+            <button class="btn-action btn-view" onclick="viewRecord({{ record['id'] }})" title="View">
+              <i class='bx bx-eye'></i>
+            </button>
+            <button class="btn-action btn-edit" onclick="openEditModal({{ record['id'] }})" title="Edit">
+              <i class='bx bx-edit'></i>
+            </button>
+            <button class="btn-action btn-delete" onclick="deleteRecord({{ record['id'] }})" title="Delete">
+              <i class='bx bx-trash'></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <i class='bx bx-inbox'></i>
+    <p>No deworming records found. <button class="btn-add" onclick="openAddModal()">Add one now</button></p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- View Modal -->
+<div id="viewModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Deworming Record Details</h3>
+      <button class="close" onclick="closeViewModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="viewModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" onclick="closeViewModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Modal -->
+<div id="addModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add Deworming Record</h3>
+      <button class="close" onclick="closeAddModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="addForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Person Type <span style="color: #dc3545;">*</span></label>
+            <select name="person_type" id="addPersonType" required>
+              <option value="">Select...</option>
+              <option value="Student">Student</option>
+              <option value="Non-Student">Non-Student</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>LRN</label>
+            <input type="text" name="lrn" id="addLRN" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Name <span style="color: #dc3545;">*</span></label>
+          <input type="text" name="name" id="addName" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Grade</label>
+            <input type="text" name="grade" id="addGrade" />
+          </div>
+          <div class="form-group">
+            <label>Section <span style="color: #dc3545;">*</span></label>
+            <input type="text" name="section" id="addSection" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Gender</label>
+            <select name="gender" id="addGender">
+              <option value="">Select</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>School Year</label>
+            <input type="text" name="school_year" id="addSchoolYear" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Recorded Date <span style="color: #dc3545;">*</span></label>
+          <input type="date" name="recorded_date" id="addRecordedDate" required />
+        </div>
+
+        <div class="form-section">
+          <h6>Pre-Deworming Assessment</h6>
+          <div class="form-row">
+            <div class="form-group">
+              <label>4P's Recipient</label>
+              <select name="pre_4ps_recipient" id="addPre4psRecipient">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>4P's with Consent</label>
+              <select name="pre_4ps_with_consent" id="addPre4psWithConsent">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Non 4P's Consent</label>
+              <select name="pre_non_4ps_consent" id="addPreNon4psConsent">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Deworming Consent</label>
+              <select name="pre_deworming_consent" id="addPreDewormingConsent">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h6>Post-Deworming Assessment</h6>
+          <div class="form-row">
+            <div class="form-group">
+              <label>4P's Children</label>
+              <select name="post_4ps_children" id="addPost4psChildren">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Non 4P's Children</label>
+              <select name="post_non_4ps_children" id="addPostNon4psChildren">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Serious Illness</label>
+              <select name="post_serious_illness" id="addPostSeriousIllness">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Adverse Effect</label>
+              <select name="post_adverse_effect" id="addPostAdverseEffect">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Remarks</label>
+          <textarea name="remarks" id="addRemarks" style="min-height: 80px;"></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" onclick="closeAddModal()">Cancel</button>
+      <button class="btn-modal btn-modal-primary" onclick="submitAdd()">Add Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Edit Deworming Record</h3>
+      <button class="close" onclick="closeEditModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="editForm">
+        <input type="hidden" id="editRecordId" />
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Person Type <span style="color: #dc3545;">*</span></label>
+            <select id="editPersonType" required>
+              <option value="">Select...</option>
+              <option value="Student">Student</option>
+              <option value="Non-Student">Non-Student</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>LRN</label>
+            <input type="text" id="editLRN" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Name <span style="color: #dc3545;">*</span></label>
+          <input type="text" id="editName" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Grade</label>
+            <input type="text" id="editGrade" />
+          </div>
+          <div class="form-group">
+            <label>Section <span style="color: #dc3545;">*</span></label>
+            <input type="text" id="editSection" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Gender</label>
+            <select name="gender" id="editGender">
+              <option value="">Select</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>School Year</label>
+            <input type="text" id="editSchoolYear" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Recorded Date <span style="color: #dc3545;">*</span></label>
+          <input type="date" id="editRecordedDate" required />
+        </div>
+
+        <div class="form-section">
+          <h6>Pre-Deworming Assessment</h6>
+          <div class="form-row">
+            <div class="form-group">
+              <label>4P's Recipient</label>
+              <select id="editPre4psRecipient">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>4P's with Consent</label>
+              <select id="editPre4psWithConsent">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Non 4P's Consent</label>
+              <select id="editPreNon4psConsent">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Deworming Consent</label>
+              <select id="editPreDewormingConsent">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h6>Post-Deworming Assessment</h6>
+          <div class="form-row">
+            <div class="form-group">
+              <label>4P's Children</label>
+              <select id="editPost4psChildren">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Non 4P's Children</label>
+              <select id="editPostNon4psChildren">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Serious Illness</label>
+              <select id="editPostSeriousIllness">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Adverse Effect</label>
+              <select id="editPostAdverseEffect">
+                <option value="">Select...</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Remarks</label>
+          <textarea id="editRemarks" style="min-height: 80px;"></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" onclick="closeEditModal()">Cancel</button>
+      <button class="btn-modal btn-modal-primary" onclick="submitEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openAddModal() {
+    console.log("openAddModal called");
+    try {
+      const addForm = document.getElementById("addForm");
+      const addModal = document.getElementById("addModal");
+      console.log("addForm:", addForm);
+      console.log("addModal:", addModal);
+      if (addForm) addForm.reset();
+      if (addModal) {
+        addModal.classList.add("show");
+        console.log("Modal classes:", addModal.classList);
+      } else {
+        console.error("addModal not found!");
+      }
+    } catch (e) {
+      console.error("Error in openAddModal:", e);
+    }
+  }
+
+  function closeAddModal() {
+    console.log("closeAddModal called");
+    const addModal = document.getElementById("addModal");
+    if (addModal) {
+      addModal.classList.remove("show");
+    }
+  }
+
+  function openEditModal(recordId) {
+    console.log("openEditModal called with recordId:", recordId);
+    try {
+      fetch(`/api/deworming/${recordId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Fetched data:", data);
+          if (data.success) {
+            const record = data.record;
+            console.log("Record object:", record);
+            document.getElementById("editRecordId").value = record.id;
+            document.getElementById("editPersonType").value = record.person_type || "";
+            document.getElementById("editLRN").value = record.lrn || "";
+            document.getElementById("editName").value = record.name || "";
+            document.getElementById("editGrade").value = record.grade || "";
+            document.getElementById("editSection").value = record.section || "";
+            document.getElementById("editGender").value = record.gender || "";
+            document.getElementById("editSchoolYear").value = record.school_year || "";
+            document.getElementById("editRecordedDate").value = record.recorded_date;
+            document.getElementById("editPre4psRecipient").value = record.pre_4ps_recipient || "";
+            document.getElementById("editPre4psWithConsent").value = record.pre_4ps_with_consent || "";
+            document.getElementById("editPreNon4psConsent").value = record.pre_non_4ps_consent || "";
+            document.getElementById("editPreDewormingConsent").value = record.pre_deworming_consent || "";
+            document.getElementById("editPost4psChildren").value = record.post_4ps_children || "";
+            document.getElementById("editPostNon4psChildren").value = record.post_non_4ps_children || "";
+            document.getElementById("editPostSeriousIllness").value = record.post_serious_illness || "";
+            document.getElementById("editPostAdverseEffect").value = record.post_adverse_effect || "";
+            document.getElementById("editRemarks").value = record.remarks || "";
+
+            const editModal = document.getElementById("editModal");
+            if (editModal) {
+              editModal.classList.add("show");
+              console.log("Edit modal opened, classes:", editModal.classList);
+            } else {
+              console.error("editModal not found!");
+            }
+          } else {
+            alert("Error loading record: " + data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("Fetch error:", error);
+          alert("Error loading record");
+        });
+    } catch (e) {
+      console.error("Error in openEditModal:", e);
+    }
+  }
+
+  function closeEditModal() {
+    console.log("closeEditModal called");
+    const editModal = document.getElementById("editModal");
+    if (editModal) {
+      editModal.classList.remove("show");
+    }
+  }
+
+  function submitAdd() {
+    const formData = new FormData(document.getElementById("addForm"));
+
+    console.log("Submitting deworming add");
+    console.log("Form data:", Object.fromEntries(formData));
+
+    fetch("/api/deworming/add", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Response:", data);
+        if (data.success) {
+          alert("Deworming record added successfully!");
+          closeAddModal();
+          location.reload();
+        } else {
+          alert("Error: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Fetch error:", error);
+        alert("An error occurred: " + error.message);
+      });
+  }
+
+  function submitEdit() {
+    const recordId = document.getElementById("editRecordId").value;
+    const formData = new FormData();
+    formData.append("person_type", document.getElementById("editPersonType").value);
+    formData.append("lrn", document.getElementById("editLRN").value);
+    formData.append("name", document.getElementById("editName").value);
+    formData.append("grade", document.getElementById("editGrade").value);
+    formData.append("section", document.getElementById("editSection").value);
+    formData.append("gender", document.getElementById("editGender").value);
+    formData.append("school_year", document.getElementById("editSchoolYear").value);
+    formData.append("recorded_date", document.getElementById("editRecordedDate").value);
+    formData.append("pre_4ps_recipient", document.getElementById("editPre4psRecipient").value);
+    formData.append("pre_4ps_with_consent", document.getElementById("editPre4psWithConsent").value);
+    formData.append("pre_non_4ps_consent", document.getElementById("editPreNon4psConsent").value);
+    formData.append("pre_deworming_consent", document.getElementById("editPreDewormingConsent").value);
+    formData.append("post_4ps_children", document.getElementById("editPost4psChildren").value);
+    formData.append("post_non_4ps_children", document.getElementById("editPostNon4psChildren").value);
+    formData.append("post_serious_illness", document.getElementById("editPostSeriousIllness").value);
+    formData.append("post_adverse_effect", document.getElementById("editPostAdverseEffect").value);
+    formData.append("remarks", document.getElementById("editRemarks").value);
+
+    console.log("Submitting deworming edit with recordId:", recordId);
+    console.log("Form data:", Object.fromEntries(formData));
+
+    fetch(`/api/deworming/edit/${recordId}`, {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Response:", data);
+        if (data.success) {
+          alert("Deworming record updated successfully!");
+          closeEditModal();
+          location.reload();
+        } else {
+          alert("Error: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Fetch error:", error);
+        alert("An error occurred: " + error.message);
+      });
+  }
+
+  function viewRecord(recordId) {
+    console.log("viewRecord called with recordId:", recordId);
+    try {
+      fetch(`/api/deworming/${recordId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("viewRecord data:", data);
+          if (data.success) {
+            const record = data.record;
+            const html = `
+              <div class="view-field">
+                <label>Person Type</label>
+                <p>${record.person_type || 'N/A'}</p>
+              </div>
+              <div class="view-field">
+                <label>LRN</label>
+                <p>${record.lrn || 'N/A'}</p>
+              </div>
+              <div class="view-field">
+                <label>Name</label>
+                <p>${record.name}</p>
+              </div>
+              <div class="view-field">
+                <label>Grade</label>
+                <p>${record.grade || 'N/A'}</p>
+              </div>
+              <div class="view-field">
+                <label>Section</label>
+                <p>${record.section}</p>
+              </div>
+              <div class="view-field">
+                <label>Gender</label>
+                <p>${record.gender || 'N/A'}</p>
+              </div>
+              <div class="view-field">
+                <label>School Year</label>
+                <p>${record.school_year || 'N/A'}</p>
+              </div>
+              <div class="view-field">
+                <label>Recorded Date</label>
+                <p>${record.recorded_date}</p>
+              </div>
+              <div style="background: #f9f9f9; padding: 1rem; border-radius: 4px; margin: 1.5rem 0; border-left: 4px solid #a83e51;">
+                <h6 style="margin: 0 0 1rem 0; color: #333;">Pre-Deworming Assessment</h6>
+                <p><strong>4P's Recipient:</strong> ${record.pre_4ps_recipient || 'N/A'}</p>
+                <p><strong>4P's with Consent:</strong> ${record.pre_4ps_with_consent || 'N/A'}</p>
+                <p><strong>Non 4P's Consent:</strong> ${record.pre_non_4ps_consent || 'N/A'}</p>
+                <p><strong>Deworming Consent:</strong> ${record.pre_deworming_consent || 'N/A'}</p>
+              </div>
+              <div style="background: #f9f9f9; padding: 1rem; border-radius: 4px; margin: 1.5rem 0; border-left: 4px solid #a83e51;">
+                <h6 style="margin: 0 0 1rem 0; color: #333;">Post-Deworming Assessment</h6>
+                <p><strong>4P's Children:</strong> ${record.post_4ps_children || 'N/A'}</p>
+                <p><strong>Non 4P's Children:</strong> ${record.post_non_4ps_children || 'N/A'}</p>
+                <p><strong>Serious Illness:</strong> ${record.post_serious_illness || 'N/A'}</p>
+                <p><strong>Adverse Effect:</strong> ${record.post_adverse_effect || 'N/A'}</p>
+              </div>
+              <div class="view-field">
+                <label>Remarks</label>
+                <p>${record.remarks || 'None'}</p>
+              </div>
+            `;
+            document.getElementById("viewModalBody").innerHTML = html;
+            const viewModal = document.getElementById("viewModal");
+            if (viewModal) {
+              viewModal.classList.add("show");
+              console.log("View modal opened, classes:", viewModal.classList);
+            } else {
+              console.error("viewModal not found!");
+            }
+          } else {
+            alert("Error: " + data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("viewRecord fetch error:", error);
+          alert("Error loading record");
+        });
+    } catch (e) {
+      console.error("Error in viewRecord:", e);
+    }
+  }
+
+  function closeViewModal() {
+    console.log("closeViewModal called");
+    const viewModal = document.getElementById("viewModal");
+    if (viewModal) {
+      viewModal.classList.remove("show");
+    }
+  }
+
+  function deleteRecord(recordId) {
+    if (confirm("Are you sure you want to delete this record?")) {
+      fetch(`/api/deworming/delete/${recordId}`, {
+        method: "DELETE",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            alert("Record deleted successfully!");
+            location.reload();
+          } else {
+            alert("Error: " + data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("An error occurred");
+        });
+    }
+  }
+
+  // Close modal when clicking outside
+  window.onclick = function (event) {
+    let modal = document.getElementById("viewModal");
+    if (event.target === modal) {
+      closeViewModal();
+    }
+    modal = document.getElementById("editModal");
+    if (event.target === modal) {
+      closeEditModal();
+    }
+    modal = document.getElementById("addModal");
+    if (event.target === modal) {
+      closeAddModal();
+    }
+  };
+
+  // Make functions globally accessible
+  window.openAddModal = openAddModal;
+  window.closeAddModal = closeAddModal;
+  window.openEditModal = openEditModal;
+  window.closeEditModal = closeEditModal;
+  window.submitAdd = submitAdd;
+  window.submitEdit = submitEdit;
+  window.viewRecord = viewRecord;
+  window.closeViewModal = closeViewModal;
+  window.deleteRecord = deleteRecord;
+</script>
+{% endblock %}

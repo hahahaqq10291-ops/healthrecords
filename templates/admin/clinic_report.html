@@ -1,0 +1,768 @@
+{% extends "shared/base.html" %}
+
+{% block extra_css %}
+<style>
+  .report-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .report-header {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid #a83e51;
+  }
+
+  .report-header h1 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 28px;
+  }
+
+  .report-info {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin: 20px 0;
+  }
+
+  .report-info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .report-info-label {
+    font-weight: 600;
+    color: #555;
+    min-width: 100px;
+  }
+
+  .report-info-value {
+    color: #333;
+  }
+
+  .filter-section {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    border: 1px solid #ddd;
+  }
+
+  .filter-section h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+  }
+
+  .filter-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+
+  .filter-group label {
+    font-weight: 600;
+    color: #555;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .filter-group input,
+  .filter-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+
+  .filter-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-generate {
+    padding: 10px 20px;
+    background: #a83e51;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+  }
+
+  .btn-generate:hover {
+    background: #8f2f41;
+  }
+
+  .btn-print {
+    padding: 10px 20px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+  }
+
+  .btn-print:hover {
+    background: #218838;
+  }
+
+  .btn-export {
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+  }
+
+  .btn-export:hover {
+    background: #0056b3;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    margin: 20px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }
+
+  .report-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+  }
+
+  .report-table thead {
+    background: #a83e51;
+    color: white;
+  }
+
+  .report-table th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    border: 1px solid #ddd;
+    font-size: 13px;
+  }
+
+  .report-table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    font-size: 13px;
+  }
+
+  .report-table tbody tr:nth-child(even) {
+    background: #f9f9f9;
+  }
+
+  .report-table tbody tr:hover {
+    background: #f0f0f0;
+  }
+
+  .person-type {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .person-type.student {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .person-type.teacher {
+    background: #cce5ff;
+    color: #004085;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .status-resolved {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .status-pending {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  .print-section {
+    margin-top: 0;
+    padding: 0;
+    background: white;
+    border-radius: 0;
+    border: none;
+  }
+
+  .print-section h3 {
+    margin: 0;
+    color: #333;
+    display: none;
+  }
+
+  .print-preview {
+    background: white;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    margin: 0;
+    page-break-inside: avoid;
+    width: 100%;
+    max-width: 100%;
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  .form-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 5px 0;
+    border: 1px solid #000;
+    flex-grow: 1;
+    height: auto;
+  }
+
+  .form-table th,
+  .form-table td {
+    border: 1px solid #000;
+    padding: 5px 5  px;
+    text-align: left;
+    font-size: 11px;
+  }
+
+  .form-table th {
+    background: #e0e0e0;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .form-table td {
+    height: auto;
+    min-height: 8px;
+    vertical-align: top;
+  }
+
+  .form-section-title {
+    background: #d4d4d4;
+    font-weight: 600;
+    text-align: left;
+    padding: 10px !important;
+  }
+
+  .summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+  }
+
+  .stat-box {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #a83e51;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #a83e51;
+  }
+
+  @media print {
+    * {
+      margin: 0 !important;
+      padding: 0 !important;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      height: auto !important;
+      background: white !important;
+      font-size: 11px;
+      line-height: 1.3;
+    }
+
+    .app-container {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .sidebar,
+    .header,
+    .mobile-menu-toggle,
+    .filter-section,
+    .filter-buttons,
+    .btn-print,
+    .btn-export,
+    .report-header,
+    .summary-stats,
+    .table-responsive,
+    .report-table {
+      display: none !important;
+    }
+
+    .content-area {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .report-container {
+      padding: 0.15in !important;
+      margin: 0 !important;
+      max-width: 100% !important;
+      width: 100% !important;
+    }
+
+    .print-section {
+      margin: 0 !important;
+      padding: 0 !important;
+      background: white !important;
+      border: none !important;
+    }
+
+    .print-preview {
+      border: none !important;
+      padding: 0 !important;
+      page-break-inside: avoid;
+      width: 100%;
+      margin: 0 !important;
+    }
+
+    .print-preview h2 {
+      margin: 0 !important;
+      padding: 2px 0 !important;
+      font-size: 12px !important;
+    }
+
+    .print-preview p {
+      margin: 0 !important;
+      padding: 1px 0 !important;
+      font-size: 9px !important;
+    }
+
+    .form-table {
+      page-break-inside: avoid;
+      width: 100%;
+      margin: 1px 0 !important;
+      border-collapse: collapse;
+    }
+
+    .form-table th,
+    .form-table td {
+      border: 1px solid #000;
+      padding: 2px 2px !important;
+      text-align: left;
+      font-size: 9px !important;
+      line-height: 1.1 !important;
+    }
+
+    .form-table th {
+      background: #f0f0f0;
+      font-weight: 600;
+    }
+
+    .form-table td {
+      height: auto;
+      min-height: 15px !important;
+      vertical-align: top;
+    }
+
+    .print-preview div {
+      margin: 2px 0 !important;
+      padding: 1px 0 !important;
+      font-size: 9px !important;
+    }
+
+    @page {
+      margin: 0.15in;
+      size: A4 landscape;
+    }
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+    font-size: 16px;
+  }
+
+  /* Pagination Styles */
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
+
+  .pagination {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .pagination-btn {
+    background-color: #8f2f41;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.3s ease;
+  }
+
+  .pagination-btn:hover:not(:disabled) {
+    background-color: #a83e51;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(143, 47, 65, 0.3);
+  }
+
+  .pagination-btn:disabled {
+    background-color: #d9d9d9;
+    color: #999;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .pagination-info {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    min-width: 100px;
+    text-align: center;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="report-container">
+  <!-- Report Header -->
+  <div class="report-header">
+    <h1> Clinic Visit Records Report</h1>
+  </div>
+   
+  
+  <!-- Filter Section -->
+  <div class="filter-section">
+    <h3>Filter Options</h3>
+    <form method="GET" id="filterForm">
+      <div class="filter-group">
+        <div>
+          <label for="startDate">Start Date:</label>
+          <input type="date" id="startDate" name="start_date" value="{{ start_date or '' }}">
+        </div>
+        <div>
+          <label for="endDate">End Date:</label>
+          <input type="date" id="endDate" name="end_date" value="{{ end_date or '' }}">
+        </div>
+        <div>
+          <label for="personType">Person Type:</label>
+          <select id="personType" name="person_type">
+            <option value="">All</option>
+            <option value="student" {% if person_type == 'student' %}selected{% endif %}>Students</option>
+            <option value="teacher" {% if person_type == 'teacher' %}selected{% endif %}>Teachers</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-buttons">
+        <button type="submit" class="btn-generate">Generate Report</button>
+        <button type="button" class="btn-print" onclick="window.print()"> Print Report</button>
+        <button type="button" class="btn-export" onclick="exportToCSV()"> Export to CSV</button>
+      </div>
+    </form>
+  </div>
+
+  {% if visits %}
+    <!-- Summary Statistics -->
+    <div class="summary-stats">
+      <div class="stat-box">
+        <div class="stat-label">Total Clinic Visits</div>
+        <div class="stat-value">{{ total_visits }}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Student Visits</div>
+        <div class="stat-value">{{ student_visits }}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Teacher Visits</div>
+        <div class="stat-value">{{ teacher_visits }}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Follow-up Required</div>
+        <div class="stat-value">{{ followup_required }}</div>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-responsive">
+      <table id="reportTable" class="report-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Person Name</th>
+            <th>Type</th>
+            <th>Sex</th>
+            <th>Age</th>
+            <th>Chief Complaint</th>
+            <th>Diagnosis</th>
+            <th>Treatment</th>
+            <th>Medications</th>
+            <th>Recommendations</th>
+            <th>Follow-up</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for visit in visits %}
+          <tr>
+            <td>{{ visit.visit_date or 'N/A' }}</td>
+            <td>{{ visit.person_name or 'Unknown' }}</td>
+            <td>
+              <span class="person-type {{ visit.person_type }}">
+                {{ visit.person_type|capitalize }}
+              </span>
+            </td>
+            <td>{{ visit.patient_sex or '—' }}</td>
+            <td>{{ visit.patient_age or '—' }}</td>
+            <td>{{ visit.chief_complaint or '—' }}</td>
+            <td>{{ visit.diagnosis or '—' }}</td>
+            <td>{{ visit.assessment or '—' }}</td>
+            <td>{{ visit.medications_given or '—' }}</td>
+            <td>{{ visit.recommendations or '—' }}</td>
+            <td>
+              {% if visit.followup_required %}
+                <span class="status-badge status-pending">Required</span>
+              {% else %}
+                <span class="status-badge status-resolved">None</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if visits|length > 7 %}
+    <div id="reportPaginationContainer" class="pagination-container">
+      <div class="pagination">
+        <button
+          id="prevReportBtn"
+          class="pagination-btn"
+          onclick="previousReportPage()"
+        >
+          ← Previous
+        </button>
+        <span class="pagination-info">
+          Page <span id="reportCurrentPage">1</span> of
+          <span id="reportTotalPages">1</span>
+        </span>
+        <button
+          id="nextReportBtn"
+          class="pagination-btn"
+          onclick="nextReportPage()"
+        >
+          Next →
+        </button>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Print Section -->
+    <div class="print-section">
+      <h3>Print Format - Daily Clinic Visit Record</h3>
+      
+      <div class="print-preview">
+        <h2 style="text-align: center; margin: 0 0 5px 0; font-size: 16px; font-weight: bold;">DAILY TREATMENT / NURSING RECORD</h2>
+        <p style="text-align: center; margin: 0 0 15px 0; font-size: 12px;">
+          <strong>School:</strong> {{  'Luis Y. Ferrer Jr. Senior High School ' }}
+        </p>
+
+        <table class="form-table">
+          <thead>
+            <tr>
+              <th style="width: 6%; border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; background-color: #ffffff; color: #000000; font-size: 9px;">Date</th>
+              <th style="width: 10%; border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; background-color: #ffffff; color: #000000; font-size: 9px;">Name / Person</th>
+              <th style="width: 8%; border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; background-color: #ffffff; color: #000000; font-size: 9px;">Grade/Section</th>
+              <th style="width: 8%; border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; background-color: #ffffff; color: #000000; font-size: 9px;">Age</th>
+              <th style="width: 8%; border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; background-color: #ffffff; color: #000000; font-size: 9px;">Sex</th>
+              <th style="width: 15%; border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; background-color: #ffffff; color: #000000;font-size: 9px;">Chief Complaint</th>
+              <th style="width: 15%; border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; background-color: #ffffff; color: #000000;font-size: 9px;">Presumptive Diagnosis</th>
+              <th style="width: 12%; border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; background-color: #ffffff; color: #000000; font-size: 9px;">Treatment Given</th>
+              <th style="width: 8%; border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; background-color: #ffffff; color: #000000; font-size: 9px;">Follow-up</th>
+              <th style="width: 12%; border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; background-color: #ffffff; color: #000000; font-size: 9px;">Init</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for visit in visits %}
+            <tr>
+              <td>{{ visit.visit_date or '' }}</td>
+              <td>{{ visit.person_name or '' }}</td>
+              <td>{{ visit.grade_section or '' }}</td>
+              <td>{{ visit.patient_age or '' }}</td>
+              <td>{{ visit.patient_sex or '' }}</td>
+              <td>{{ visit.chief_complaint or '' }}</td>
+              <td>{{ visit.diagnosis or '' }}</td>
+              <td>{{ visit.assessment or '' }}</td>
+              <td>{% if visit.followup_required %}✓{% endif %}</td>
+              <td></td>
+            </tr>
+            {% endfor %}
+            
+            <!-- Empty rows for handwritten entries -->
+            {% for i in range(5) %}
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div style="margin: 2px 0 0 0; padding: 0; text-align: center;">
+          <p style="margin: 1px 0; font-weight: bold; font-size: 7px;">Prepared by:</p>
+          <p style="border-top: 1px solid #000; padding-top: 2px; margin: 2px 0; min-height: 8px;"></p>
+          <p style="margin: 2px 0; font-size: 14px; font-weight: bold;">Health Officer / School Nurse</p>
+        </div>
+      </div>
+    </div>
+
+  {% else %}
+    <div class="no-data">
+      <p>No clinic visit records found for the selected filters.</p>
+      <p style="font-size: 14px; color: #666;">Try adjusting your date range or filters.</p>
+    </div>
+  {% endif %}
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+function exportToCSV() {
+  const table = document.querySelector('.report-table');
+  let csv = 'Date,Person Name,Type,Sex,Age,Chief Complaint,Diagnosis,Treatment,Medications,Recommendations,Follow-up\n';
+  
+  const rows = table.querySelectorAll('tbody tr');
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    const rowData = [];
+    
+    cells.forEach((cell, index) => {
+      if (index < 11) { // Include all relevant columns
+        let text = cell.textContent.trim();
+        text = '"' + text.replace(/"/g, '""') + '"';
+        rowData.push(text);
+      }
+    });
+    
+    csv += rowData.join(',') + '\n';
+  });
+  
+  const link = document.createElement('a');
+  link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  link.download = `clinic_report_${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+}
+
+document.getElementById('filterForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  this.submit();
+});
+
+// Pagination Functions for Report Table
+const itemsPerPage = 7;
+let currentReportPage = 1;
+
+function paginateReport(page) {
+  const table = document.getElementById("reportTable");
+  const rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+  const totalRows = rows.length;
+  const totalPages = Math.ceil(totalRows / itemsPerPage);
+
+  const startIndex = (page - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+
+  for (let i = 0; i < rows.length; i++) {
+    if (i >= startIndex && i < endIndex) {
+      rows[i].style.display = "";
+    } else {
+      rows[i].style.display = "none";
+    }
+  }
+
+  // Update pagination display
+  if (document.getElementById("reportCurrentPage")) {
+    document.getElementById("reportCurrentPage").textContent = page;
+    document.getElementById("reportTotalPages").textContent = totalPages;
+    document.getElementById("prevReportBtn").disabled = page === 1;
+    document.getElementById("nextReportBtn").disabled = page === totalPages;
+  }
+
+  currentReportPage = page;
+}
+
+function previousReportPage() {
+  if (currentReportPage > 1) {
+    paginateReport(currentReportPage - 1);
+  }
+}
+
+function nextReportPage() {
+  const table = document.getElementById("reportTable");
+  const rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+  const totalPages = Math.ceil(rows.length / itemsPerPage);
+  if (currentReportPage < totalPages) {
+    paginateReport(currentReportPage + 1);
+  }
+}
+
+// Initialize pagination on page load
+document.addEventListener("DOMContentLoaded", function () {
+  const reportTable = document.getElementById("reportTable");
+  if (reportTable && document.getElementById("reportPaginationContainer")) {
+    paginateReport(1);
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,319 @@
+{% extends "shared/base.html" %}
+
+{% block title %}Edit Deworming Record{% endblock %}
+
+{% block content %}
+<style>
+  .container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+  }
+
+  .form-card {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .form-header {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e9ecef;
+  }
+
+  .form-header h2 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 28px;
+  }
+
+  .form-header p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+  }
+
+  .info-box {
+    background: #e7f3ff;
+    border-left: 4px solid #0d6efd;
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #0d6efd;
+  }
+
+  .alert {
+    padding: 12px 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+
+  .alert-danger {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .form-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+  }
+
+  .required::after {
+    content: " *";
+    color: red;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="email"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  input[type="text"]:focus,
+  input[type="date"]:focus,
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .section-title {
+    color: #666;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    padding-left: 10px;
+    border-left: 4px solid #0d6efd;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+  }
+
+  .btn {
+    padding: 10px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-primary {
+    background: #0d6efd;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #0b5ed7;
+  }
+
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: #5a6268;
+  }
+</style>
+
+<div class="container">
+  <div class="form-card">
+    <div class="form-header">
+      <h2><i class='bx bx-virus'></i> Edit Deworming Record</h2>
+      <p>Update the deworming record information</p>
+    </div>
+
+    <div class="info-box">
+      <strong>Record ID:</strong> {{ deworming_record['id'] }} | 
+      <strong>Created:</strong> {{ deworming_record['created_at'] or 'N/A' }}
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+      <!-- Basic Information -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="personType">Person Type</label>
+          <input type="text" id="personType" value="{{ deworming_record['person_type'] or '' }}" readonly style="background: #f5f5f5;">
+        </div>
+        <div class="form-group">
+          <label for="lrn">LRN (Learner Reference Number)</label>
+          <input type="text" id="lrn" name="lrn" value="{{ deworming_record['lrn'] or '' }}" placeholder="Enter LRN">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="name" class="required">Name</label>
+        <input type="text" id="name" name="name" value="{{ deworming_record['name'] or '' }}" placeholder="Full Name" required>
+      </div>
+
+      <div class="form-row-3">
+        <div class="form-group">
+          <label for="grade">Grade</label>
+          <input type="text" id="grade" name="grade" value="{{ deworming_record['grade'] or '' }}" placeholder="e.g., Grade 7">
+        </div>
+        <div class="form-group">
+          <label for="section" class="required">Section</label>
+          <input type="text" id="section" name="section" value="{{ deworming_record['section'] or '' }}" placeholder="e.g., 12-Fortan" required>
+        </div>
+        <div class="form-group">
+          <label for="schoolYear">School Year</label>
+          <input type="text" id="schoolYear" name="school_year" value="{{ deworming_record['school_year'] or '' }}" placeholder="e.g., 2024-2025">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="recordedDate" class="required">Date Recorded</label>
+        <input type="date" id="recordedDate" name="recorded_date" value="{{ deworming_record['recorded_date'] or '' }}" required>
+      </div>
+
+      <!-- Pre-Deworming Section -->
+      <div class="section-title">Pre-Deworming Assessment</div>
+      
+      <div class="form-row-3">
+        <div class="form-group">
+          <label for="pre4psRecipient">4P's Recipient (YES/NO)</label>
+          <select id="pre4psRecipient" name="pre_4ps_recipient">
+            <option value="">Select</option>
+            <option value="YES" {% if deworming_record['pre_4ps_recipient'] in ['YES', 'Yes', 'yes'] %}selected{% endif %}>YES</option>
+            <option value="NO" {% if deworming_record['pre_4ps_recipient'] in ['NO', 'No', 'no'] %}selected{% endif %}>NO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="pre4psConsent">4P's with Consent (YES/NO)</label>
+          <select id="pre4psConsent" name="pre_4ps_with_consent">
+            <option value="">Select</option>
+            <option value="YES" {% if deworming_record['pre_4ps_with_consent'] in ['YES', 'Yes', 'yes'] %}selected{% endif %}>YES</option>
+            <option value="NO" {% if deworming_record['pre_4ps_with_consent'] in ['NO', 'No', 'no'] %}selected{% endif %}>NO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="preNon4psConsent">Non-4P's Consent (YES/NO)</label>
+          <select id="preNon4psConsent" name="pre_non_4ps_consent">
+            <option value="">Select</option>
+            <option value="YES" {% if deworming_record['pre_non_4ps_consent'] in ['YES', 'Yes', 'yes'] %}selected{% endif %}>YES</option>
+            <option value="NO" {% if deworming_record['pre_non_4ps_consent'] in ['NO', 'No', 'no'] %}selected{% endif %}>NO</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="preDeworming">Consented to Deworming (YES/NO)</label>
+        <select id="preDeworming" name="pre_deworming_consent">
+          <option value="">Select</option>
+          <option value="YES" {% if deworming_record['pre_deworming_consent'] in ['YES', 'Yes', 'yes'] %}selected{% endif %}>YES</option>
+          <option value="NO" {% if deworming_record['pre_deworming_consent'] in ['NO', 'No', 'no'] %}selected{% endif %}>NO</option>
+        </select>
+      </div>
+
+      <!-- Post-Deworming Section -->
+      <div class="section-title">Post-Deworming Assessment</div>
+      
+      <div class="form-row-3">
+        <div class="form-group">
+          <label for="post4psChildren">4P's Children Dewormed (YES/NO)</label>
+          <select id="post4psChildren" name="post_4ps_children">
+            <option value="">Select</option>
+            <option value="YES" {% if deworming_record['post_4ps_children'] in ['YES', 'Yes', 'yes'] %}selected{% endif %}>YES</option>
+            <option value="NO" {% if deworming_record['post_4ps_children'] in ['NO', 'No', 'no'] %}selected{% endif %}>NO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="postNon4psChildren">Non-4P's Children Dewormed (YES/NO)</label>
+          <select id="postNon4psChildren" name="post_non_4ps_children">
+            <option value="">Select</option>
+            <option value="YES" {% if deworming_record['post_non_4ps_children'] in ['YES', 'Yes', 'yes'] %}selected{% endif %}>YES</option>
+            <option value="NO" {% if deworming_record['post_non_4ps_children'] in ['NO', 'No', 'no'] %}selected{% endif %}>NO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="postSerious">Serious Illness/Hyperactivity (YES/NO)</label>
+          <select id="postSerious" name="post_serious_illness">
+            <option value="">Select</option>
+            <option value="YES" {% if deworming_record['post_serious_illness'] in ['YES', 'Yes', 'yes'] %}selected{% endif %}>YES</option>
+            <option value="NO" {% if deworming_record['post_serious_illness'] in ['NO', 'No', 'no'] %}selected{% endif %}>NO</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="postAdverse">Adverse Effect (YES/NO)</label>
+        <select id="postAdverse" name="post_adverse_effect">
+          <option value="">Select</option>
+          <option value="YES" {% if deworming_record['post_adverse_effect'] in ['YES', 'Yes', 'yes'] %}selected{% endif %}>YES</option>
+          <option value="NO" {% if deworming_record['post_adverse_effect'] in ['NO', 'No', 'no'] %}selected{% endif %}>NO</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="remarks">Remarks</label>
+        <textarea id="remarks" name="remarks" placeholder="Additional notes...">{{ deworming_record['remarks'] or '' }}</textarea>
+      </div>
+
+      <div class="form-actions">
+        <a href="{{ url_for('deworming_management') }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">Update Record</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

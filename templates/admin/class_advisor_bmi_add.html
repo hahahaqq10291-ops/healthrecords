@@ -1,0 +1,373 @@
+{% extends "shared/base.html" %} {% block extra_css %}
+<style>
+  .form-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .form-container h2 {
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-container .section-info {
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-left: 4px solid #a83e51;
+    border-radius: 4px;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .required {
+    color: #dc3545;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="number"],
+  input[type="email"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: #a83e51;
+    box-shadow: 0 0 0 3px rgba(168, 62, 81, 0.1);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .form-row.full {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s;
+    flex: 1;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-submit {
+    background: #a83e51;
+    color: white;
+  }
+
+  .btn-submit:hover {
+    background: #8a3243;
+  }
+
+  .btn-cancel {
+    background: #e9ecef;
+    color: #333;
+  }
+
+  .btn-cancel:hover {
+    background: #dee2e6;
+  }
+
+  .semester-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: #e3f2fd;
+    color: #1976d2;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+  }
+
+  @media (max-width: 600px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .btn-group {
+      flex-direction: column;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="form-container">
+  <h2>Add BMI Record for Your Section</h2>
+  <div class="section-info">
+    <strong>Section/Grade:</strong> {{ advisory_class }}
+    <br />
+    <small>This record will be automatically saved with your section information</small>
+  </div>
+
+  <form id="bmiForm">
+    <div class="form-row">
+      <div class="form-group">
+        <label>LRN (Learner Reference Number) <span class="required">*</span></label>
+        <input type="text" name="person_id" id="lrnInput" placeholder="e.g., 108095070657" required />
+      </div>
+      <div class="form-group">
+        <label>Full Name <span class="required">*</span></label>
+        <input type="text" name="student_name" id="studentName" placeholder="Enter student name" required />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date of Birth <span class="required">*</span></label>
+        <input type="date" name="birthdate" id="studentBirthdate" required />
+      </div>
+      <div class="form-group">
+        <label>Record Date <span class="required">*</span></label>
+        <input type="date" name="record_date" id="recordDateInput" required />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Semester <span class="required">*</span></label>
+        <select name="semester" required>
+          <option value="1st Semester">1st Semester</option>
+          <option value="2nd Semester">2nd Semester</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Height (m) <span class="required">*</span></label>
+        <input
+          type="number"
+          name="height"
+          step="0.01"
+          placeholder="e.g., 1.60"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label>Weight (kg) <span class="required">*</span></label>
+        <input
+          type="number"
+          name="weight"
+          step="0.1"
+          placeholder="e.g., 50.5"
+          required
+        />
+      </div>
+    </div>
+
+    <!-- BMI Results Display -->
+    <div id="bmiResults" style="display: none; margin-bottom: 1.5rem; padding: 1rem; background: #f0f8ff; border-radius: 4px; border-left: 4px solid #a83e51;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div>
+          <label style="font-weight: 600; color: #333; margin-bottom: 0.25rem; display: block;">📊 BMI Value:</label>
+          <p id="bmiValue" style="margin: 0; font-size: 1.3rem; color: #a83e51; font-weight: bold;">-</p>
+        </div>
+        <div>
+          <label style="font-weight: 600; color: #333; margin-bottom: 0.25rem; display: block;">📈 Nutritional Status:</label>
+          <p id="nutritionalStatusDisplay" style="margin: 0; font-size: 1.3rem; color: #0f5132; font-weight: bold;">-</p>
+        </div>
+      </div>
+      <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #dee2e6;">
+        <label style="font-weight: 600; color: #333; margin-bottom: 0.25rem; display: block;">📏 Height for Age:</label>
+        <p id="heightForAgeDisplay" style="margin: 0; font-size: 1rem; color: #666;">-</p>
+      </div>
+    </div>
+
+    <!-- Hidden fields to store auto-calculated values -->
+    <input type="hidden" name="nutritional_status" id="nutritionalStatus" value="" />
+    <input type="hidden" name="height_for_age" id="heightForAge" value="" />
+
+    <div class="form-group full">
+      <label>Remarks</label>
+      <textarea name="remarks" placeholder="Additional notes..."></textarea>
+    </div>
+
+    <div class="btn-group">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-cancel">Cancel</a>
+      <button type="submit" class="btn btn-submit">Add BMI Record</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  // BMI Calculation and Auto-fill Function with new categories
+  function calculateBMI() {
+    const height = parseFloat(document.getElementById('heightInput').value);
+    const weight = parseFloat(document.getElementById('weightInput').value);
+    const birthdateInput = document.getElementById("studentBirthdate");
+    const recordDateInput = document.getElementById('recordDateInput');
+    
+    const birthdate = birthdateInput ? birthdateInput.value : '';
+    const recordDate = recordDateInput ? recordDateInput.value : '';
+
+    // Only calculate if both height and weight are valid
+    if (!height || !weight || height <= 0 || weight <= 0) {
+      document.getElementById('bmiResults').style.display = 'none';
+      return;
+    }
+
+    // Calculate BMI: weight (kg) / (height (m) ^ 2)
+    const bmi = weight / (height * height);
+
+    // Determine Nutritional Status using the new BMI categories
+    let nutritionalStatus = '';
+    if (bmi < 15) {
+      nutritionalStatus = 'Severely wasted';
+    } else if (bmi < 18.5) {
+      nutritionalStatus = 'Wasted';
+    } else if (bmi < 25) {
+      nutritionalStatus = 'Normal';
+    } else if (bmi < 30) {
+      nutritionalStatus = 'Overweight';
+    } else if (bmi <= 40) {
+      nutritionalStatus = 'Obese';
+    } else {
+      nutritionalStatus = 'Morbidly Obese';
+    }
+
+    // Determine Height for Age (based on age and height)
+    let heightForAge = '';
+    let ageYears = 0;
+    
+    if (birthdate && recordDate) {
+      const birth = new Date(birthdate);
+      const record = new Date(recordDate);
+      ageYears = Math.floor((record - birth) / (365.25 * 24 * 60 * 60 * 1000));
+
+      // WHO Growth Standards - Height for Age classification
+      heightForAge = classifyHeightForAge(height, ageYears);
+    }
+
+    // Display results
+    document.getElementById('bmiValue').textContent = bmi.toFixed(1);
+    document.getElementById('nutritionalStatusDisplay').textContent = nutritionalStatus;
+    document.getElementById('heightForAgeDisplay').textContent = 
+      heightForAge ? `${heightForAge} (Age: ${ageYears} years)` : 'Enter Date of Birth and Record Date to calculate';
+    document.getElementById('bmiResults').style.display = 'block';
+
+    // Auto-fill the hidden fields
+    document.getElementById('nutritionalStatus').value = nutritionalStatus;
+    if (heightForAge) {
+      document.getElementById('heightForAge').value = heightForAge;
+    }
+  }
+
+  // Classify Height for Age using WHO/CDC standards (simplified)
+  function classifyHeightForAge(height, ageYears) {
+    // Simplified WHO/CDC growth standards for ages 6-18
+    // Median heights with stunted threshold (~85% of median = -2 SD)
+    const heightStandards = {
+      6: { median: 1.15, stunted_threshold: 0.98 },
+      7: { median: 1.23, stunted_threshold: 1.05 },
+      8: { median: 1.31, stunted_threshold: 1.11 },
+      9: { median: 1.37, stunted_threshold: 1.16 },
+      10: { median: 1.43, stunted_threshold: 1.22 },
+      11: { median: 1.50, stunted_threshold: 1.28 },
+      12: { median: 1.56, stunted_threshold: 1.33 },
+      13: { median: 1.63, stunted_threshold: 1.39 },
+      14: { median: 1.69, stunted_threshold: 1.44 },
+      15: { median: 1.73, stunted_threshold: 1.47 },
+      16: { median: 1.75, stunted_threshold: 1.49 },
+      17: { median: 1.76, stunted_threshold: 1.50 },
+      18: { median: 1.77, stunted_threshold: 1.51 }
+    };
+
+    if (ageYears >= 6 && ageYears <= 18) {
+      const standard = heightStandards[ageYears];
+      if (height < standard.stunted_threshold) {
+        return 'Stunted';
+      } else {
+        return 'Normal';
+      }
+    }
+    
+    return '';
+  }
+
+  // Add event listeners for real-time calculation
+  document.getElementById('heightInput').addEventListener('change', calculateBMI);
+  document.getElementById('heightInput').addEventListener('input', calculateBMI);
+  document.getElementById('weightInput').addEventListener('change', calculateBMI);
+  document.getElementById('weightInput').addEventListener('input', calculateBMI);
+  document.getElementById('recordDateInput').addEventListener('change', calculateBMI);
+  document.getElementById('recordDateInput').addEventListener('input', calculateBMI);
+  
+  // Recalculate when birthdate is updated
+  const birthdateInput = document.getElementById("studentBirthdate");
+  if (birthdateInput) {
+    birthdateInput.addEventListener('change', calculateBMI);
+  }
+
+  document
+    .getElementById("bmiForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+
+      try {
+        const response = await fetch('{{ url_for("class_advisor_bmi_add") }}', {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert("BMI record added successfully!");
+          window.location.href = '{{ url_for("class_advisor_bmi_records") }}';
+        } else {
+          alert("Error: " + data.message);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred. Please try again.");
+      }
+    });
+</script>
+{% endblock %}

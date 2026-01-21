@@ -1,0 +1,320 @@
+{% extends "shared/base.html" %} {% block extra_css %}
+<style>
+  .form-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .form-container h2 {
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-container .section-info {
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-left: 4px solid #a83e51;
+    border-radius: 4px;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .required {
+    color: #dc3545;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="email"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: #a83e51;
+    box-shadow: 0 0 0 3px rgba(168, 62, 81, 0.1);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .form-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .section-title {
+    color: #666;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    padding-left: 0.75rem;
+    border-left: 4px solid #a83e51;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s;
+    flex: 1;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-submit {
+    background: #a83e51;
+    color: white;
+  }
+
+  .btn-submit:hover {
+    background: #8a3243;
+  }
+
+  .btn-cancel {
+    background: #e9ecef;
+    color: #333;
+  }
+
+  .btn-cancel:hover {
+    background: #dee2e6;
+  }
+
+  @media (max-width: 768px) {
+    .form-row,
+    .form-row-3 {
+      grid-template-columns: 1fr;
+    }
+
+    .btn-group {
+      flex-direction: column;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="form-container">
+  <h2>Add Deworming Record for Your Section</h2>
+  <div class="section-info">
+    <strong>Section/Grade:</strong> {{ advisory_class }}
+    <br />
+    <small>This record will be automatically saved with your section information</small>
+  </div>
+
+  <form id="dewormingForm">
+    <div class="form-group">
+      <label>Student <span class="required">*</span></label>
+      <select name="person_id" id="studentSelect" onchange="updateStudentName()">
+        <option value="">-- Select a student (optional) --</option>
+        {% for student in students %}
+        <option value="{{ student['id'] }}" data-name="{{ student['name'] }}" data-lrn="{{ student['studentLRN'] }}">
+          {{ student['name'] }} (LRN: {{ student['studentLRN'] }})
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Full Name <span class="required">*</span></label>
+        <input
+          type="text"
+          name="student_name"
+          id="studentName"
+          placeholder="Enter student name or select from list"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label>LRN (Learner Reference Number)</label>
+        <input type="text" name="lrn" id="studentLRN" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>School Year <span class="required">*</span></label>
+        <input type="text" name="school_year" placeholder="e.g., 2025-2026" required />
+      </div>
+      <div class="form-group">
+        <label>Recorded Date <span class="required">*</span></label>
+        <input type="date" name="recorded_date" required />
+      </div>
+    </div>
+
+    <!-- PRE-DEWORMING SECTION -->
+    <div class="section-title">Pre-Deworming Assessment</div>
+
+    <div class="form-row-3">
+      <div class="form-group">
+        <label>4Ps Recipient</label>
+        <select name="pre_4ps_recipient">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>4Ps with Consent</label>
+        <select name="pre_4ps_with_consent">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Non-4Ps (with Consent)</label>
+        <select name="pre_non_4ps_consent">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Deworming Consent</label>
+      <select name="pre_deworming_consent">
+        <option value="No">No</option>
+        <option value="Yes">Yes</option>
+      </select>
+    </div>
+
+    <!-- POST-DEWORMING SECTION -->
+    <div class="section-title">Post-Deworming Assessment</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>4Ps Children</label>
+        <select name="post_4ps_children">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Non-4Ps Children</label>
+        <select name="post_non_4ps_children">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Serious Illness</label>
+        <select name="post_serious_illness">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Adverse Effect</label>
+        <select name="post_adverse_effect">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- REMARKS -->
+    <div class="form-group">
+      <label>Remarks</label>
+      <textarea name="remarks" placeholder="Additional notes..."></textarea>
+    </div>
+
+    <div class="btn-group">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-cancel">Cancel</a>
+      <button type="submit" class="btn btn-submit">Add Deworming Record</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  function updateStudentName() {
+    const select = document.getElementById("studentSelect");
+    const selectedOption = select.options[select.selectedIndex];
+    const nameInput = document.getElementById("studentName");
+    const lrnInput = document.getElementById("studentLRN");
+
+    if (selectedOption.value) {
+      nameInput.value = selectedOption.getAttribute("data-name");
+      lrnInput.value = selectedOption.getAttribute("data-lrn") || "";
+    } else {
+      nameInput.value = "";
+      lrnInput.value = "";
+    }
+  }
+
+  document
+    .getElementById("dewormingForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+
+      try {
+        const response = await fetch('{{ url_for("class_advisor_deworming_add") }}', {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert("Deworming record added successfully!");
+          window.location.href = '{{ url_for("class_advisor_deworming_records") }}';
+        } else {
+          alert("Error: " + data.message);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred. Please try again.");
+      }
+    });
+</script>
+{% endblock %}

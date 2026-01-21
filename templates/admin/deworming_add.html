@@ -1,0 +1,317 @@
+{% extends "shared/base.html" %} {% block title %}Add Deworming Record{%
+endblock %} {% block extra_css %}
+<style>
+  .form-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    margin-left: 300px;
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: calc(100% - 300px);
+    box-sizing: border-box;
+  }
+
+  .form-container h2 {
+    color: #333;
+    margin-bottom: 2rem;
+  }
+
+  .form-container p {
+    color: #666;
+    font-size: 15px;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .required {
+    color: #dc3545;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="email"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: #a83e51;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .form-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .section-title {
+    color: #666;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding-left: 0.75rem;
+    border-left: 4px solid #a83e51;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s;
+    flex: 1;
+  }
+
+  .btn-submit {
+    background: #a83e51;
+    color: white;
+  }
+
+  .btn-submit:hover {
+    background: #8a3243;
+  }
+
+  .btn-cancel {
+    background: #e9ecef;
+    color: #333;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-cancel:hover {
+    background: #dee2e6;
+  }
+
+  .alert {
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+
+  .alert-danger {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+</style>
+
+<div class="form-container">
+  <h2><i class="bx bx-virus"></i> Add Deworming Record</h2>
+  <p>Fill in the form below to add a new deworming record</p>
+
+  {% with messages = get_flashed_messages(with_categories=true) %} {% if
+  messages %} {% for category, message in messages %}
+  <div class="alert alert-{{ category }}">{{ message }}</div>
+  {% endfor %} {% endif %} {% endwith %}
+
+  <form method="POST" id="deworming-form">
+      <!-- Basic Information -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="personType" class="required">Person Type</label>
+          <select id="personType" name="person_type" required>
+            <option value="">Select Type</option>
+            <option value="Student">Student</option>
+            <option value="Teacher">Teacher</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="lrn">LRN (Learner Reference Number)</label>
+          <input type="text" id="lrn" name="lrn" placeholder="Enter LRN" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="name" class="required">Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          placeholder="Full Name"
+          required
+        />
+      </div>
+
+      <div class="form-row-3">
+        <div class="form-group">
+          <label for="grade">Grade</label>
+          <input
+            type="text"
+            id="grade"
+            name="grade"
+            placeholder="e.g., Grade 7"
+          />
+        </div>
+        <div class="form-group">
+          <label for="section" class="required">Section</label>
+          <input
+            type="text"
+            id="section"
+            name="section"
+            placeholder="e.g., 12-Fortan"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="schoolYear">School Year</label>
+          <input
+            type="text"
+            id="schoolYear"
+            name="school_year"
+            placeholder="e.g., 2024-2025"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="recordedDate" class="required">Date Recorded</label>
+        <input type="date" id="recordedDate" name="recorded_date" required />
+      </div>
+
+      <!-- Pre-Deworming Section -->
+      <div class="section-title">Pre-Deworming Assessment</div>
+
+      <div class="form-row-3">
+        <div class="form-group">
+          <label for="pre4psRecipient">4P's Recipient (YES/NO)</label>
+          <select id="pre4psRecipient" name="pre_4ps_recipient">
+            <option value="">Select</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="pre4psConsent">4P's with Consent (YES/NO)</label>
+          <select id="pre4psConsent" name="pre_4ps_with_consent">
+            <option value="">Select</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="preNon4psConsent">Non-4P's Consent (YES/NO)</label>
+          <select id="preNon4psConsent" name="pre_non_4ps_consent">
+            <option value="">Select</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="preDeworming">Consented to Deworming (YES/NO)</label>
+        <select id="preDeworming" name="pre_deworming_consent">
+          <option value="">Select</option>
+          <option value="YES">YES</option>
+          <option value="NO">NO</option>
+        </select>
+      </div>
+
+      <!-- Post-Deworming Section -->
+      <div class="section-title">Post-Deworming Assessment</div>
+
+      <div class="form-row-3">
+        <div class="form-group">
+          <label for="post4psChildren">4P's Children Dewormed (YES/NO)</label>
+          <select id="post4psChildren" name="post_4ps_children">
+            <option value="">Select</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="postNon4psChildren"
+            >Non-4P's Children Dewormed (YES/NO)</label
+          >
+          <select id="postNon4psChildren" name="post_non_4ps_children">
+            <option value="">Select</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="postSerious"
+            >Serious Illness/Hyperactivity (YES/NO)</label
+          >
+          <select id="postSerious" name="post_serious_illness">
+            <option value="">Select</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="postAdverse">Adverse Effect (YES/NO)</label>
+        <select id="postAdverse" name="post_adverse_effect">
+          <option value="">Select</option>
+          <option value="YES">YES</option>
+          <option value="NO">NO</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="remarks">Remarks</label>
+        <textarea
+          id="remarks"
+          name="remarks"
+          placeholder="Additional notes..."
+        ></textarea>
+      </div>
+
+      <div class="btn-group">
+        <a href="{{ url_for('deworming_management') }}" class="btn btn-cancel"
+          >Cancel</a
+        >
+        <button type="submit" class="btn btn-submit">Save Record</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,217 @@
+{% extends "shared/base.html" %}
+
+{% block extra_css %}
+<style>
+.form-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h2 {
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.required {
+  color: #dc3545;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="number"],
+input[type="email"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.btn-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s;
+  flex: 1;
+}
+
+.btn-submit {
+  background: #667eea;
+  color: white;
+}
+
+.btn-submit:hover {
+  background: #5568d3;
+}
+
+.btn-cancel {
+  background: #e9ecef;
+  color: #333;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-cancel:hover {
+  background: #dee2e6;
+}
+
+.info-box {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #667eea;
+}
+
+.info-box p {
+  margin: 0.5rem 0;
+  color: #666;
+}
+
+@media (max-width: 600px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-group {
+    flex-direction: column;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+  <h2>Edit BMI Record</h2>
+
+  <div class="info-box">
+    <p><strong>Person:</strong> {{ bmi_record['name'] }}</p>
+    <p><strong>Record ID:</strong> {{ bmi_record['id'] }}</p>
+    <p><strong>Last Updated:</strong> {{ bmi_record['updated_at'] }}</p>
+  </div>
+
+  <form method="POST">
+    <div class="form-row">
+      <div class="form-group">
+        <label>LRN (Learner Reference Number)</label>
+        <input type="text" name="person_id" value="{{ bmi_record['person_id'] or '' }}">
+      </div>
+      <div class="form-group">
+        <label>Full Name <span class="required">*</span></label>
+        <input type="text" name="name" value="{{ bmi_record['name'] }}" required>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date of Birth</label>
+        <input type="date" name="birthdate" value="{{ bmi_record['birthdate'] or '' }}">
+      </div>
+      <div class="form-group">
+        <label>Record Date <span class="required">*</span></label>
+        <input type="date" name="record_date" value="{{ bmi_record['record_date'] }}" required>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Grade/Level</label>
+        <input type="text" name="grade" value="{{ bmi_record['grade'] or '' }}">
+      </div>
+      <div class="form-group">
+        <label>Section</label>
+        <input type="text" name="section" value="{{ bmi_record['section'] or '' }}">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Height (m) <span class="required">*</span></label>
+        <input type="number" name="height" step="0.01" value="{{ bmi_record['height'] }}" required>
+      </div>
+      <div class="form-group">
+        <label>Weight (kg) <span class="required">*</span></label>
+        <input type="number" name="weight" step="0.1" value="{{ bmi_record['weight'] }}" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Nutritional Status</label>
+      <select name="nutritional_status">
+        <option value="">Select...</option>
+        <option value="Normal" {% if bmi_record['nutritional_status'] == 'Normal' %}selected{% endif %}>Normal</option>
+        <option value="Overweight" {% if bmi_record['nutritional_status'] == 'Overweight' %}selected{% endif %}>Overweight</option>
+        <option value="Underweight" {% if bmi_record['nutritional_status'] == 'Underweight' %}selected{% endif %}>Underweight</option>
+        <option value="Obese" {% if bmi_record['nutritional_status'] == 'Obese' %}selected{% endif %}>Obese</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Height for Age</label>
+      <select name="height_for_age">
+        <option value="">Select...</option>
+        <option value="Normal" {% if bmi_record['height_for_age'] == 'Normal' %}selected{% endif %}>Normal</option>
+        <option value="Stunted" {% if bmi_record['height_for_age'] == 'Stunted' %}selected{% endif %}>Stunted</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Remarks</label>
+      <textarea name="remarks">{{ bmi_record['remarks'] or '' }}</textarea>
+    </div>
+
+    <div class="btn-group">
+      <a href="{{ url_for('bmi_management') }}" class="btn btn-cancel">Cancel</a>
+      <button type="submit" class="btn btn-submit">Update Record</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

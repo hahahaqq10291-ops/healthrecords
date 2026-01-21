@@ -1,0 +1,98 @@
+<header class="dashboard-header">
+  <div class="header-left">
+    <button class="menu-toggle" id="menuToggle">
+      <i class="bx bx-menu"></i>
+    </button>
+    <h1 class="page-title" id="pageTitle">Dashboard</h1>
+  </div>
+
+ 
+
+  <div class="header-right">
+    <!-- Notifications -->
+    <div class="notification-item">
+      <button class="notification-btn" id="notificationBtn">
+        <i class="bx bx-bell"></i>
+        <span
+          class="notification-badge"
+          id="notificationBadge"
+          style="display: none"
+          >0</span
+        >
+      </button>
+      <div
+        class="notification-dropdown"
+        id="notificationDropdown"
+        style="display: none"
+      >
+        <div class="notification-header">
+          <h3>Notifications</h3>
+          <button class="close-btn" id="closeNotifications">
+            <i class="bx bx-x"></i>
+          </button>
+        </div>
+        <div class="notification-list" id="notificationList">
+          <div class="notification-empty">No notifications</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Profile -->
+    <div class="user-profile">
+      <button class="profile-btn" id="profileBtn">
+        <img
+          id="headerProfilePic"
+          src=""
+          alt="Profile"
+          class="profile-pic-small"
+        />
+        <i class="bx bx-chevron-down"></i>
+      </button>
+      <div class="profile-dropdown" id="profileDropdown" style="display: none">
+        <div class="profile-dropdown-header">
+          <img
+            id="dropdownProfilePic"
+            src=""
+            alt="Profile"
+            class="profile-pic-dropdown"
+          />
+          <div class="profile-info">
+            <p class="profile-name" id="dropdownFullname">
+              {{ session.get('fullname', 'User') }}
+            </p>
+            <p class="profile-role" id="dropdownRole">
+              {{ session.get('role', 'User') }}
+            </p>
+          </div>
+        </div>
+        <nav class="profile-menu">
+          <a href="{{ url_for('profile_settings') }}" class="profile-menu-item">
+            <i class="bx bx-cog"></i>
+            <span>Profile Settings</span>
+          </a>
+          <a href="{{ url_for('dashboard') }}" class="profile-menu-item">
+            <i class="bx bx-home"></i>
+            <span>Dashboard</span>
+          </a>
+          {% if session.get('role') in ['super_admin', 'health_officer'] %}
+          <a
+            href="{{ url_for('advanced_management') }}"
+            class="profile-menu-item"
+          >
+            <i class="bx bx-shield-alt"></i>
+            <span>Advanced Management</span>
+          </a>
+          {% endif %}
+          <div class="profile-menu-divider"></div>
+          <a
+            href="{{ url_for('logout') }}"
+            class="profile-menu-item logout-item"
+          >
+            <i class="bx bx-log-out"></i>
+            <span>Log Out</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>

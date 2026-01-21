@@ -1,0 +1,403 @@
+{% extends "shared/base.html" %} {% block extra_css %}
+<style>
+  .bmi-view-container {
+    max-width: 900px;
+    margin: 30px auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .view-header {
+    background: linear-gradient(135deg, #a83e51 0%, #8a3243 100%);
+    color: white;
+    padding: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .view-header h1 {
+    margin: 0;
+    font-size: 28px;
+  }
+
+  .view-header-actions {
+    display: flex;
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .btn-primary:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .btn-secondary {
+    background: white;
+    color: #a83e51;
+  }
+
+  .btn-secondary:hover {
+    background: #f5f5f5;
+  }
+
+  .view-content {
+    padding: 40px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+  }
+
+  .info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .info-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .info-label {
+    font-size: 13px;
+    color: #666;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .info-value {
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .divider {
+    height: 1px;
+    background: #e9ecef;
+    margin: 20px 0;
+  }
+
+  .bmi-result {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+  }
+
+  .bmi-result h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+  }
+
+  .bmi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .bmi-card {
+    background: white;
+    padding: 20px;
+    border-radius: 6px;
+    border-left: 4px solid #a83e51;
+  }
+
+  .bmi-card-label {
+    font-size: 12px;
+    color: #666;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .bmi-card-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #a83e51;
+  }
+
+  .bmi-category {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 15px;
+  }
+
+  .category-underweight {
+    background: #cfe2ff;
+    color: #084298;
+  }
+
+  .category-normal {
+    background: #d1e7dd;
+    color: #0f5132;
+  }
+
+  .category-overweight {
+    background: #fff3cd;
+    color: #664d03;
+  }
+
+  .category-obese {
+    background: #f8d7da;
+    color: #842029;
+  }
+
+  .status-box {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+
+  .status-box h4 {
+    margin: 0 0 15px 0;
+    color: #333;
+  }
+
+  .status-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .status-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .status-label {
+    font-size: 12px;
+    color: #666;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .status-value {
+    font-size: 15px;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .remarks-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 6px;
+    margin-top: 20px;
+  }
+
+  .remarks-section h4 {
+    margin: 0 0 15px 0;
+    color: #333;
+  }
+
+  .remarks-text {
+    color: #555;
+    line-height: 1.6;
+    font-size: 14px;
+  }
+
+  .action-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+    border-top: 1px solid #e9ecef;
+    padding-top: 20px;
+  }
+
+  .back-link {
+    color: #a83e51;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .back-link:hover {
+    text-decoration: underline;
+  }
+
+  @media print {
+    .view-header-actions,
+    .action-row {
+      display: none;
+    }
+
+    .bmi-view-container {
+      box-shadow: none;
+      margin: 0;
+    }
+
+    .view-header {
+      background: white;
+      color: #333;
+      border-bottom: 2px solid #a83e51;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="bmi-view-container">
+  <div class="view-header">
+    <h1>BMI Record Details</h1>
+    <div class="view-header-actions">
+      <button class="btn btn-primary" onclick="window.print()">
+        <i class="bx bx-printer"></i> Print
+      </button>
+      <a href="{{ url_for('bmi_management') }}" class="btn btn-secondary">
+        <i class="bx bx-arrow-back"></i> Back
+      </a>
+    </div>
+  </div>
+
+  <div class="view-content">
+    <!-- Student Information -->
+    <div class="info-grid">
+      <div class="info-section">
+        <h3 style="margin: 0 0 15px 0; color: #333">Student Information</h3>
+
+        <div class="info-group">
+          <span class="info-label">Student Name</span>
+          <span class="info-value">{{ record['name'] }}</span>
+        </div>
+
+        <div class="info-group">
+          <span class="info-label">LRN</span>
+          <span class="info-value">{{ record['person_id'] or 'N/A' }}</span>
+        </div>
+
+        <div class="info-group">
+          <span class="info-label">Birthdate</span>
+          <span class="info-value">{{ record['birthdate'] or 'N/A' }}</span>
+        </div>
+
+        <div class="info-group">
+          <span class="info-label">Grade</span>
+          <span class="info-value">{{ record['grade'] or 'N/A' }}</span>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h3 style="margin: 0 0 15px 0; color: #333">Class Information</h3>
+
+        <div class="info-group">
+          <span class="info-label">Section</span>
+          <span class="info-value">{{ record['section'] }}</span>
+        </div>
+
+        <div class="info-group">
+          <span class="info-label">Semester</span>
+          <span class="info-value">{{ record['semester'] or 'N/A' }}</span>
+        </div>
+
+        <div class="info-group">
+          <span class="info-label">Record Date</span>
+          <span class="info-value">{{ record['record_date'] }}</span>
+        </div>
+
+        <div class="info-group">
+          <span class="info-label">School Year</span>
+          <span class="info-value">{{ record['school_year'] or 'N/A' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BMI Measurements -->
+    <div class="bmi-result">
+      <h3>📊 BMI Measurements & Results</h3>
+
+      <div class="bmi-grid">
+        <div class="bmi-card">
+          <div class="bmi-card-label">Height</div>
+          <div class="bmi-card-value">{{ "%.2f"|format(record['height']) }}</div>
+          <div style="color: #666; font-size: 12px">meters</div>
+        </div>
+
+        <div class="bmi-card">
+          <div class="bmi-card-label">Weight</div>
+          <div class="bmi-card-value">{{ "%.2f"|format(record['weight']) }}</div>
+          <div style="color: #666; font-size: 12px">kilograms</div>
+        </div>
+
+        <div class="bmi-card">
+          <div class="bmi-card-label">BMI</div>
+          <div class="bmi-card-value">{% if record['bmi'] %}{{ "%.1f"|format(record['bmi']) }}{% else %}N/A{% endif %}</div>
+          <div style="color: #666; font-size: 12px">kg/m²</div>
+        </div>
+      </div>
+
+      {% if record['bmi_category'] %}
+      <div style="text-align: center;">
+        <span class="bmi-category category-{{ record['bmi_category'].lower() }}">
+          {{ record['bmi_category'] }}
+        </span>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Health Status -->
+    <div class="status-box">
+      <h4>🏥 Health Status</h4>
+      <div class="status-info">
+        <div class="status-item">
+          <span class="status-label">Nutritional Status</span>
+          <span class="status-value">{{ record['nutritional_status'] or 'N/A' }}</span>
+        </div>
+
+        <div class="status-item">
+          <span class="status-label">Height for Age</span>
+          <span class="status-value">{{ record['height_for_age'] or 'N/A' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Remarks -->
+    {% if record['remarks'] %}
+    <div class="remarks-section">
+      <h4>📝 Remarks</h4>
+      <p class="remarks-text">{{ record['remarks'] }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="action-row">
+      <a href="{{ url_for('bmi_edit', record_id=record['id']) }}" class="btn btn-primary" style="color: #a83e51; background: #f8f9fa; border: none">
+        <i class="bx bx-edit"></i> Edit Record
+      </a>
+      <a href="{{ url_for('bmi_management') }}" class="back-link">
+        <i class="bx bx-arrow-back"></i> Back to Management
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

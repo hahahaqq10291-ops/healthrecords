@@ -1,0 +1,420 @@
+{% extends "shared/base.html" %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard.css') }}"
+/>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<style>
+  .analytics-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .analytics-header {
+    margin-bottom: 30px;
+    border-bottom: 2px solid #a83e51;
+    padding-bottom: 15px;
+  }
+
+  .analytics-header h1 {
+    margin: 0;
+    color: #333;
+  }
+
+  .quick-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+
+  .stat-box {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-box.blue {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .stat-box.green {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  }
+
+  .stat-box.orange {
+    background: linear-gradient(135deg, #fd7e14 0%, #ff9f1c 100%);
+  }
+
+  .stat-box.red {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  }
+
+  .stat-number {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  .stat-label {
+    font-size: 14px;
+    opacity: 0.9;
+  }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .chart-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .chart-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+    border-bottom: 2px solid #a83e51;
+    padding-bottom: 10px;
+  }
+
+  .chart-canvas-wrapper {
+    position: relative;
+    height: 300px;
+    margin-bottom: 10px;
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-style: italic;
+  }
+
+  .trends-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+  }
+
+  .trends-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+    border-bottom: 2px solid #a83e51;
+    padding-bottom: 10px;
+  }
+
+  .trend-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+    transition: background-color 0.2s;
+  }
+
+  .trend-item:hover {
+    background-color: #f9f9f9;
+  }
+
+  .trend-name {
+    font-weight: 600;
+    color: #333;
+  }
+
+  .trend-count {
+    background-color: #a83e51;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  .trend-bar {
+    flex: 1;
+    height: 20px;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    margin: 0 15px;
+    overflow: hidden;
+  }
+
+  .trend-bar-fill {
+    height: 100%;
+    background-color: #a83e51;
+    transition: width 0.3s;
+    width: 0%;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #a83e51;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .back-link:hover {
+    text-decoration: underline;
+  }
+
+  .export-btn {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s;
+  }
+
+  .export-btn:hover {
+    background-color: #20c997;
+  }
+
+  @media (max-width: 768px) {
+    .charts-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .quick-stats {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
+    .chart-canvas-wrapper {
+      height: 250px;
+    }
+  }
+</style>
+
+
+{% endblock %} {% block content %}
+
+<!-- DASHBOARD HEADER -->
+{% include "components/header.html" %}
+
+
+<!-- FLASH MESSAGES (at bottom of header) -->
+{% with messages = get_flashed_messages(with_categories=true) %} {% if
+messages %}
+<div class="flash-messages">
+  {% for category, message in messages %}
+  <div class="flash-message flash-{{ category }}">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %} {% endwith %}
+
+<!-- Main Content Area -->
+<main class="main-content">
+  <!-- Content Area -->
+  <div class="content">
+    <!-- Dashboard Page -->
+    <div id="dashboard" class="page active">
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-info">
+            <h3>Total Students</h3>
+            <p id="total-students">{{ total_students }}</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📋</div>
+          <div class="stat-info">
+            <h3>Total Records</h3>
+            <p id="total-records">{{ total_records }}</p>
+          </div>
+        </div>
+      </div>
+
+   <div class="content">
+    <!-- Dashboard Page -->
+    <div id="dashboard" class="page active">
+      {% if session.get('role') in ['super_admin', 'health_officer'] %}
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-info">
+            <h3>Total Teachers</h3>
+            <p id="total-students">{{ total_teachers }}</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📋</div>
+          <div class="stat-info">
+            <h3>Total Records</h3>
+            <p id="total-record">{{ total_teacher_records }}</p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+
+      <div class="recent-records">
+        <h2>Recently Added Students</h2>
+        <table id="recent-records-table">
+          <thead>
+            <tr>
+              <th>Student ID</th>
+              <th>LRN</th>
+              <th>Name</th>
+              <th>Class</th>
+              <th>Date of Birth</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for student in recent_students %}
+            <tr>
+              <td>{{ student.id }}</td>
+              <td>{{ student.studentLRN }}</td>
+              <td>
+                <a
+                  >{{ student.name }}</a
+                >
+              </td>
+              <td>{{ student.class }}</td>
+              <td>{{ student.dob }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if session.get('role') in ['super_admin', 'health_officer'] %}
+      <br>
+      <br>
+      <div class="recent-records">
+        <h2>Recently Added Teachers</h2>
+        <table id="recent-teachers-table">
+          <thead>
+            <tr>
+              <th>Teacher ID</th>
+              <th>Teacher Code</th>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Date of Birth</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for teacher in recent_teachers %}
+            <tr>
+              <td>{{ teacher.id }}</td>
+              <td>{{ teacher.teacherID }}</td>
+              <td>
+                <a
+                  >{{ teacher.name }}</a
+                >
+              </td>
+              <td>{{ teacher.department }}</td>
+              <td>{{ teacher.dob }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </div>
+
+<br>
+<br>
+
+
+
+  <!-- Charts Section - REFACTORED ANALYTICS (Only for Admins/Health Officers) -->
+  {% if user_role != 'class_advisor' %}
+  <div class="charts-grid">
+    <!-- Students with Allergies by Strand -->
+    <div class="chart-container">
+      <div class="chart-title">Students with Allergies by Strand</div>
+      {% if students_allergies_strand %}
+      <div class="chart-canvas-wrapper">
+        <canvas id="studentsAllergiesStrandChart"></canvas>
+      </div>
+      {% else %}
+      <div class="no-data">No allergy data available by strand</div>
+      {% endif %}
+    </div>
+
+    <!-- Strands with Most Clinic Visits -->
+    <div class="chart-container">
+      <div class="chart-title">Clinic Visits by Strand</div>
+      {% if strands_most_visits %}
+      <div class="chart-canvas-wrapper">
+        <canvas id="strandsClinicVisitsChart"></canvas>
+      </div>
+      {% else %}
+      <div class="no-data">No clinic visit data available</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Teachers Analytics -->
+  <div class="trends-container">
+    <div class="trends-title">Teachers Analytics</div>
+    
+    <!-- Total Teachers with Allergies -->
+    <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center;">
+      <h3 style="margin-top: 0; color: #333;">Total Teachers with Allergies</h3>
+      <div style="font-size: 36px; font-weight: bold; color: #a83e51;">{{ total_teachers_allergies }}</div>
+    </div>
+
+    <!-- Most Clinic Visits Records -->
+    <h4 style="color: #333; margin-top: 20px;">Most Clinic Visits Records (Teachers)</h4>
+    {% if teachers_most_visits %}
+    <div>
+      {% set max_teacher_visits = (teachers_most_visits.values() | list)[0] if teachers_most_visits else 1 %}
+      {% for teacher_name, visit_count in teachers_most_visits.items() %}
+      <div class="trend-item">
+        <div class="trend-name">{{ teacher_name }}</div>
+        <div class="trend-bar">
+          <div
+            class="trend-bar-fill"
+            data-width="{% if max_teacher_visits > 0 %}{{ (visit_count / max_teacher_visits * 100) | int }}{% else %}0{% endif %}"
+          ></div>
+        </div>
+        <div class="trend-count">{{ visit_count }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-data">No clinic visit data available</div>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+  </div>
+
+
+<script type="text/template" id="analytics-data">
+  window.bloodData = {{ blood_distribution | tojson | safe }} || {};
+  window.vaccData = {{ vaccination_status | tojson | safe }} || {};
+  window.allergyData = {{ allergies | tojson | safe }} || {};
+  window.illnessData = {{ illnesses | tojson | safe }} || {};
+  window.studentsAllergiesStrandData = {{ students_allergies_strand | tojson | safe }} || {};
+  window.strandsClinicVisitsData = {{ strands_most_visits | tojson | safe }} || {};
+  </script>
+<script>
+  eval(document.getElementById("analytics-data").textContent);
+      </script>
+  <script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+
+  {% endblock %}
+</main>

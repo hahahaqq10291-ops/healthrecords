@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Health Record Management System</title>
+
+    <!-- Boxicons -->
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Main layout styles -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/dashboard.css') }}"
+    />
+
+    <!-- Header styles -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/header.css') }}"
+    />
+
+    <!-- Flash Message Styles -->
+    <style>
+      .flash-messages {
+        margin: 1rem 0;
+        z-index: 1000;
+      }
+      .flash-message {
+        padding: 1rem 1.5rem;
+        margin-bottom: 0.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+        animation: slideIn 0.3s ease-out;
+        transition: opacity 0.3s ease-out;
+      }
+      .flash-success {
+        background-color: #d4edda;
+        color: #155724;
+        border-left: 4px solid #28a745;
+      }
+      .flash-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border-left: 4px solid #dc3545;
+      }
+      .flash-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border-left: 4px solid #17a2b8;
+      }
+      .flash-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border-left: 4px solid #ffc107;
+      }
+      @keyframes slideIn {
+        from {
+          transform: translateX(-100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- MOBILE MENU TOGGLE BUTTON -->
+      <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="bx bx-menu"></i>
+      </button>
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <img
+            src="{{ url_for('static', filename='imgs/577258389_819623970710259_5288846695784598957_n-removebg-preview.png') }}"
+            alt="School Logo"
+            class="sidebar-logo"
+          />
+          <div class="sidebar-title">
+            <h1>LYFJSHS</h1>
+            <p>Health Record Management System</p>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <ul>
+            <li>
+              <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon"><i class="bx bx-grid-alt"></i></span>
+                <span class="nav-label">Dashboard</span>
+              </a>
+            </li>
+            {% if session.get('role') in ['super_admin', 'health_officer'] %}
+            <li>
+              <a href="{{ url_for('user_management') }}" class="nav-item">
+                <span class="nav-icon"><i class="bx bx-group"></i></span>
+                <span class="nav-label">Personal Information</span>
+              </a>
+            </li>
+            {% endif %}
+            <li>
+              <a href="{{ url_for('record_lists') }}" class="nav-item">
+                <span class="nav-icon"><i class="bx bx-list-ul"></i></span>
+                <span class="nav-label">Record Lists</span>
+              </a>
+            </li>
+            {% if session.get('role') in ['super_admin', 'health_officer',
+            'class_advisor'] %}
+            <li>
+              <a href="{{ url_for('view_clinic_visits') }}" class="nav-item">
+                <span class="nav-icon"><i class="bx bx-heart"></i></span>
+                <span class="nav-label">Clinic Visits</span>
+              </a>
+            </li>
+            {% endif %} {% if session.get('role') == 'class_advisor' %}
+            <li>
+              <a href="{{ url_for('class_advisor_bmi_records') }}" class="nav-item">
+                <span class="nav-icon"><i class="bx bx-file"></i></span>
+                <span class="nav-label">BMI Records</span>
+              </a>
+            </li>
+            {% endif %} {% if session.get('role') == 'class_advisor' %}
+            <li>
+              <a href="{{ url_for('class_advisor_deworming_records') }}" class="nav-item">
+                <span class="nav-icon"><i class="bx bx-file-blank"></i></span>
+                <span class="nav-label">Deworming Records</span>
+              </a>
+            </li>
+            {% endif %} {% if session.get('role') in ['super_admin',
+            'health_officer'] %}
+            <li>
+              <a href="{{ url_for('clinic_reports') }}" class="nav-item">
+                <span class="nav-icon"
+                  ><i class="bx bx-bar-chart-alt-2"></i
+                ></span>
+                <span class="nav-label">Reports</span>
+              </a>
+            </li>
+            {% endif %} {% if session.get('role') in ['super_admin',
+            'health_officer'] %}
+            <li>
+              <a href="{{ url_for('bmi_management') }}" class="nav-item">
+                <span class="nav-icon"><i class="bx bx-line-chart"></i></span>
+                <span class="nav-label">BMI Management</span>
+              </a>
+            </li>
+            {% endif %} {% if session.get('role') in ['super_admin',
+            'health_officer'] %}
+            <li>
+              <a href="{{ url_for('deworming_management') }}" class="nav-item">
+                <span class="nav-icon"><i class="bx bx-list-check"></i></span>
+                <span class="nav-label">Deworming Management</span>
+              </a>
+            </li>
+            {% endif %} {% if session.get('role') in ['super_admin',
+            'health_officer'] %}
+            <li>
+              <a
+                href="{{ url_for('deworming_section_view') }}"
+                class="nav-item"
+              >
+                <span class="nav-icon"><i class="bx bx-notepad"></i></span>
+                <span class="nav-label">Deworming by Section</span>
+              </a>
+            </li>
+            {% endif %} {% if session.get('role') in ['super_admin',
+            'health_officer'] %}
+            <li>
+              <a href="{{ url_for('inventory') }}" class="nav-item">
+                <span class="nav-icon"><i class="bx bx-package"></i></span>
+                <span class="nav-label">Inventory</span>
+              </a>
+            </li>
+            {% endif %} {% if session.get('role') in ['super_admin',
+            'health_officer'] %}
+            <li>
+              <a href="{{ url_for('advanced_management') }}" class="nav-item">
+                <span class="nav-icon"><i class="bx bx-cog"></i></span>
+                <span class="nav-label">Advanced Management</span>
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </aside>
+
+      <div class="content-area">
+        <!-- PAGE CONTENT -->
+        <main class="main-content">{% block content %}{% endblock %}</main>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Toggle Script -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+        const mobileMenuClose = document.getElementById("mobileMenuClose");
+        const sidebar = document.getElementById("sidebar");
+
+        if (mobileMenuToggle) {
+          mobileMenuToggle.addEventListener("click", function () {
+            sidebar.classList.add("active");
+          });
+        }
+
+        if (mobileMenuClose) {
+          mobileMenuClose.addEventListener("click", function () {
+            sidebar.classList.remove("active");
+          });
+        }
+
+        // Close menu when clicking a nav item
+        const navItems = document.querySelectorAll(".nav-item");
+        navItems.forEach((item) => {
+          item.addEventListener("click", function () {
+            sidebar.classList.remove("active");
+          });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener("click", function (e) {
+          if (
+            !sidebar.contains(e.target) &&
+            !mobileMenuToggle.contains(e.target)
+          ) {
+            sidebar.classList.remove("active");
+          }
+        });
+      });
+    </script>
+
+    <!-- Header Component Script -->
+    <script src="{{ url_for('static', filename='js/header.js') }}"></script>
+
+    <!-- Universal Form Validation Functions -->
+    <script>
+      function validateEditStudentForm() {
+        const lrn = document
+          .querySelector('input[name="studentLRN"]')
+          .value.trim();
+        const name = document.querySelector('input[name="name"]').value.trim();
+        const className = document
+          .querySelector('input[name="class"]')
+          .value.trim();
+
+        if (lrn.length < 3) {
+          alert("Student LRN must be at least 3 characters");
+          return false;
+        }
+        if (name.length < 3) {
+          alert("Student name must be at least 3 characters");
+          return false;
+        }
+        if (!className) {
+          alert("Class/Grade is required");
+          return false;
+        }
+        return true;
+      }
+
+      function validateEditTeacherForm() {
+        const id = document
+          .querySelector('input[name="teacherID"]')
+          .value.trim();
+        const name = document.querySelector('input[name="name"]').value.trim();
+        const dept = document
+          .querySelector('input[name="department"]')
+          .value.trim();
+
+        if (id.length < 3) {
+          alert("Teacher ID must be at least 3 characters");
+          return false;
+        }
+        if (name.length < 3) {
+          alert("Teacher name must be at least 3 characters");
+          return false;
+        }
+        if (!dept) {
+          alert("Department is required");
+          return false;
+        }
+        return true;
+      }
+
+      function validateClinicVisitForm() {
+        const personType = document.getElementById("personType").value;
+        const personId = document.getElementById("personId").value;
+        const chiefComplaint = document
+          .getElementById("chiefComplaint")
+          .value.trim();
+
+        if (!personType) {
+          alert("Please select a person type");
+          return false;
+        }
+        if (!personId) {
+          alert("Please select a person");
+          return false;
+        }
+        if (!chiefComplaint) {
+          alert("Chief complaint is required");
+          return false;
+        }
+
+        // Validate vital signs if entered
+        const temp = document.getElementById("temperature").value;
+        if (temp && (parseFloat(temp) < 35 || parseFloat(temp) > 42)) {
+          alert("Temperature must be between 35°C and 42°C");
+          return false;
+        }
+
+        const hr = document.getElementById("heartRate").value;
+        if (hr && (parseInt(hr) < 30 || parseInt(hr) > 200)) {
+          alert("Heart rate must be between 30 and 200 bpm");
+          return false;
+        }
+
+        const rr = document.getElementById("respiratoryRate").value;
+        if (rr && (parseInt(rr) < 8 || parseInt(rr) > 60)) {
+          alert("Respiratory rate must be between 8 and 60 breaths/min");
+          return false;
+        }
+
+        return true;
+      }
+
+      function validateAddMedicineForm() {
+        const name = document.getElementById("item_name").value.trim();
+        const category = document.getElementById("category").value;
+        const quantity = document.getElementById("quantity").value;
+        const unit = document.getElementById("unit").value;
+
+        if (name.length < 3) {
+          alert("Medicine name must be at least 3 characters");
+          return false;
+        }
+        if (!category) {
+          alert("Please select a category");
+          return false;
+        }
+        if (!quantity || parseInt(quantity) < 1) {
+          alert("Quantity must be at least 1");
+          return false;
+        }
+        if (!unit) {
+          alert("Please select a unit");
+          return false;
+        }
+        return true;
+      }
+
+      function validateUploadForm() {
+        const docName = document.getElementById("documentName").value.trim();
+        const docType = document.getElementById("documentType").value;
+        const file = document.getElementById("file").files[0];
+
+        if (docName.length < 3) {
+          alert("Document name must be at least 3 characters");
+          return false;
+        }
+        if (!docType) {
+          alert("Please select a document type");
+          return false;
+        }
+        if (!file) {
+          alert("Please select a file to upload");
+          return false;
+        }
+
+        // Check file size (max 10MB)
+        const maxSize = 10 * 1024 * 1024;
+        if (file.size > maxSize) {
+          alert("File size must be less than 10MB");
+          return false;
+        }
+
+        // Check file type (PDFs, images, documents)
+        const allowedTypes = [
+          "application/pdf",
+          "image/jpeg",
+          "image/png",
+          "image/gif",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ];
+        if (!allowedTypes.includes(file.type)) {
+          alert("Please upload a valid file type (PDF, Image, Word Doc)");
+          return false;
+        }
+
+        return true;
+      }
+
+      function validateAddUserForm() {
+        const fullname = document.getElementById("fullname").value.trim();
+        const username = document.getElementById("username").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const role = document.getElementById("role").value;
+
+        if (fullname.length < 3) {
+          alert("Full name must be at least 3 characters");
+          return false;
+        }
+        if (username.length < 3) {
+          alert("Username must be at least 3 characters");
+          return false;
+        }
+        if (!email.includes("@")) {
+          alert("Please enter a valid email address");
+          return false;
+        }
+        if (password.length < 6) {
+          alert("Password must be at least 6 characters");
+          return false;
+        }
+        if (!role) {
+          alert("Please select a role");
+          return false;
+        }
+        return true;
+      }
+
+      function validateAssignClassForm() {
+        const className = document
+          .getElementById("advisoryClassInput")
+          .value.trim();
+        if (className.length < 2) {
+          alert("Class name must be at least 2 characters");
+          return false;
+        }
+        return true;
+      }
+
+      function validateInventoryMedicineForm() {
+        const name = document.getElementById("item_name").value.trim();
+        const category = document.getElementById("category").value;
+        const quantity = document.getElementById("quantity").value;
+        const unit = document.getElementById("unit").value;
+
+        if (name.length < 3) {
+          alert("Medicine name must be at least 3 characters");
+          return false;
+        }
+        if (!category) {
+          alert("Please select a category");
+          return false;
+        }
+        if (!quantity || parseInt(quantity) < 1) {
+          alert("Quantity must be at least 1");
+          return false;
+        }
+        if (!unit) {
+          alert("Please select a unit");
+          return false;
+        }
+        return true;
+      }
+    </script>
+  </body>
+</html>

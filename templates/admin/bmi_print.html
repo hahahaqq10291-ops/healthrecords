@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>School Form 8 - Learner's Basic Health and Nutrition Report</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+        padding: 20px;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .btn-print {
+        background: #667eea;
+        color: white;
+      }
+
+      .btn-print:hover {
+        background: #5568d3;
+      }
+
+      .btn-export {
+        background: #28a745;
+        color: white;
+      }
+
+      .btn-export:hover {
+        background: #218838;
+      }
+
+      .print-container {
+        max-width: 8.5in;
+        margin: 0 auto;
+        background: white;
+        padding: 0.75in;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .header-section {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 0.25in;
+        border-bottom: 2px solid #000;
+        padding-bottom: 0.2in;
+      }
+
+      .logo-section {
+        width: 0.7in;
+        height: 0.7in;
+        border: 2px solid #000;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 10pt;
+        flex-shrink: 0;
+      }
+
+      .title-section {
+        flex: 1;
+        text-align: center;
+        padding: 0 0.3in;
+      }
+
+      .title-section h1 {
+        font-size: 16pt;
+        font-weight: bold;
+        margin: 0;
+        line-height: 1.2;
+      }
+
+      .title-section p {
+        font-size: 10pt;
+        margin: 0;
+      }
+
+      .dept-section {
+        text-align: right;
+        font-size: 10pt;
+      }
+
+      .dept-section .dept-title {
+        color: #d32f2f;
+        font-weight: bold;
+        font-size: 14pt;
+      }
+
+      .dept-section .dept-subtitle {
+        color: #d32f2f;
+        font-weight: bold;
+        font-size: 8pt;
+        line-height: 1.1;
+      }
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.15in;
+        margin-bottom: 0.2in;
+      }
+
+      .info-field {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .info-field label {
+        font-size: 9pt;
+        font-weight: bold;
+        margin-bottom: 2px;
+      }
+
+      .info-field .value {
+        border: 1px solid #000;
+        padding: 4px;
+        font-size: 9pt;
+        min-height: 20px;
+        display: flex;
+        align-items: center;
+      }
+
+      .table-section {
+        margin-bottom: 0.3in;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 8pt;
+      }
+
+      th {
+        border: 1px solid #000;
+        padding: 4px;
+        background: #f0f0f0;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      td {
+        border: 1px solid #000;
+        padding: 4px;
+        text-align: center;
+      }
+
+      td.text-left {
+        text-align: left;
+      }
+
+      .summary-table {
+        width: 50%;
+        margin-top: 0.2in;
+      }
+
+      .signature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.3in;
+        margin-top: 0.4in;
+      }
+
+      .signature-block {
+        text-align: center;
+        font-size: 9pt;
+      }
+
+      .signature-line {
+        border-top: 1px solid #000;
+        margin-top: 0.3in;
+        height: 0.5in;
+        margin-bottom: 0.1in;
+      }
+
+      .signature-label {
+        font-weight: bold;
+        margin-bottom: 0.15in;
+      }
+
+      @media print {
+        body {
+          padding: 0;
+          background: white;
+        }
+        .print-container {
+          box-shadow: none;
+          max-width: 100%;
+          padding: 0.5in;
+        }
+        .button-group {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="button-group">
+      <button class="btn btn-print" onclick="window.print()">
+        <i class="bx bx-printer"></i> Print
+      </button>
+      <button class="btn btn-export" onclick="exportToCSV()">
+        <i class="bx bx-download"></i> Export to CSV
+      </button>
+    </div>
+
+    <div class="print-container">
+      <!-- HEADER -->
+      <div class="header-section">
+        <div class="logo-section">DepEd</div>
+        <div class="title-section">
+          <h1>School Form 8</h1>
+          <p><strong>Learner's Basic Health and Nutrition Report</strong></p>
+          <p>(For All Grade Levels)</p>
+        </div>
+        <div class="dept-section">
+          <div class="dept-title">DeED</div>
+          <div class="dept-subtitle">DEPARTMENT<br />OF<br />EDUCATION</div>
+        </div>
+      </div>
+
+      <!-- SCHOOL INFORMATION -->
+      <div class="info-grid">
+        <div class="info-field">
+          <label>School Name</label>
+          <div class="value">
+            Luis Y. Ferrer Jr. Senior High School
+          </div>
+        </div>
+        <div class="info-field">
+          <label>District</label>
+          <div class="value">11</div>
+        </div>
+        <div class="info-field">
+          <label>Division</label>
+          <div class="value">GENERAL TRIAS CITY</div>
+        </div>
+        <div class="info-field">
+          <label>Region</label>
+          <div class="value">N-A</div>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-field">
+          <label>School ID</label>
+          <div class="value"></div>
+        </div>
+        <div class="info-field">
+          <label>Grade</label>
+          <div class="value">{{ bmi_record['grade'] or '' }}</div>
+        </div>
+        <div class="info-field">
+          <label>Section</label>
+          <div class="value">{{ bmi_record['section'] or '' }}</div>
+        </div>
+        <div class="info-field">
+          <label>School Year</label>
+          <div class="value">2023-2024</div>
+        </div>
+      </div>
+
+      <!-- LEARNER DATA TABLE -->
+      <div class="table-section">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>LRN</th>
+              <th>
+                Learner's Name<br />(LastName, FirstName, Extension, Middle)
+              </th>
+              <th>Birthdate<br />(MM/DD/YYYY)</th>
+              <th>Age</th>
+              <th>Weight<br />(kg)</th>
+              <th>Height<br />(m)</th>
+              <th>Height²<br />(m²)</th>
+              <th>BMI<br />(kg/m²)</th>
+              <th>BMI<br />Category</th>
+              <th>Nutritional<br />Status</th>
+              <th>Height for<br />Age (HFA)</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td></td>
+              <td class="text-left">{{ bmi_record['name'] }}</td>
+              <td>{{ bmi_record['birthdate'] or '' }}</td>
+              <td></td>
+              <td>{{ "%.2f"|format(bmi_record['weight']) }}</td>
+              <td>{{ "%.2f"|format(bmi_record['height']) }}</td>
+              <td>
+                {{ "%.4f"|format(bmi_record['height'] * bmi_record['height']) }}
+              </td>
+              <td>
+                {% if bmi_record['bmi'] %}{{ "%.2f"|format(bmi_record['bmi'])
+                }}{% else %}-{% endif %}
+              </td>
+              <td>{{ bmi_record['bmi_category'] or '' }}</td>
+              <td>{{ bmi_record['nutritional_status'] or '' }}</td>
+              <td>{{ bmi_record['height_for_age'] or '' }}</td>
+              <td class="text-left">{{ bmi_record['remarks'] or '' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SUMMARY TABLE -->
+      <div class="table-section">
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>Nutritional Status</th>
+              <th>Number of Learners</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Normal</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Overweight</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Underweight</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Obese</td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SIGNATURES -->
+      <div class="signature-grid">
+        <div class="signature-block">
+          <div class="signature-label">School Nurse/Health Worker</div>
+          <div class="signature-line"></div>
+          <div style="font-size: 8pt">Signature over Printed Name</div>
+        </div>
+        <div class="signature-block">
+          <div class="signature-label">School Principal/Head</div>
+          <div class="signature-line"></div>
+          <div style="font-size: 8pt">Signature over Printed Name</div>
+        </div>
+        <div class="signature-block">
+          <div class="signature-label">Date</div>
+          <div class="signature-line" style="border-top: none">
+            {{ bmi_record['record_date'] }}
+          </div>
+          <div style="font-size: 8pt">Date</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function exportToCSV() {
+        const csvContent = [
+          ["BMI Record Export"],
+          [""],
+          ["Name", '{{ bmi_record["name"] }}'],
+          ["Date", '{{ bmi_record["record_date"] }}'],
+          ["Grade", '{{ bmi_record["grade"] or "" }}'],
+          ["Section", '{{ bmi_record["section"] or "" }}'],
+          ["Birthdate", '{{ bmi_record["birthdate"] or "" }}'],
+          ["Weight (kg)", '{{ bmi_record["weight"] }}'],
+          ["Height (m)", '{{ bmi_record["height"] }}'],
+          [
+            "Height² (m²)",
+            '{{ ("%.4f"|format(bmi_record["height"] * bmi_record["height"])) }}',
+          ],
+          [
+            "BMI",
+            '{% if bmi_record["bmi"] %}{{ ("%.2f"|format(bmi_record["bmi"])) }}{% else %}N/A{% endif %}',
+          ],
+          ["BMI Category", '{{ bmi_record["bmi_category"] or "" }}'],
+          [
+            "Nutritional Status",
+            '{{ bmi_record["nutritional_status"] or "" }}',
+          ],
+          ["Height for Age", '{{ bmi_record["height_for_age"] or "" }}'],
+          ["Remarks", '{{ bmi_record["remarks"] or "" }}'],
+        ]
+          .map((row) => row.map((cell) => `"${cell}"`).join(","))
+          .join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = 'bmi_record_{{ bmi_record["id"] }}.csv';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
+    </script>
+  </body>
+</html>

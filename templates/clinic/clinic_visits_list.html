@@ -1,0 +1,2187 @@
+{% extends "shared/base.html" %} {% block extra_css %}
+<style>
+  .visits-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .class-advisor-banner {
+    background: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    color: #1565c0;
+    font-weight: 500;
+  }
+
+  .visits-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #a83e51;
+    padding-bottom: 50px;
+  }
+
+  .visits-header h1 {
+    margin: 0;
+    color: #333;
+  }
+
+  .btn-new-visit {
+    padding: 10px 20px;
+    background-color: #8f2f41;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.3s;
+  }
+
+  .btn-new-visit:hover {
+    background-color: #a83e51;
+  }
+
+  .visits-table {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .visits-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .visits-table th {
+    background: #a83e51;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 1px solid #ddd;
+    color: white;
+  }
+
+  .visits-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .visits-table tr:hover {
+    background: #f9f9f9;
+  }
+
+  .person-type-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .badge-student {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .badge-teacher {
+    background: #cce5ff;
+    color: #0056b3;
+  }
+
+  .complaint-text {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #666;
+    font-size: 13px;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 5px;
+  }
+
+  .btn-view {
+    padding: 6px 12px;
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.3s;
+  }
+
+  .btn-view:hover {
+    background-color: #138496;
+  }
+
+  .btn-delete {
+    padding: 6px 12px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+  }
+
+  .btn-delete:hover {
+    background-color: #c82333;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: #999;
+  }
+
+  .empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+  }
+
+  .stat-boxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+
+  .stat-box {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #a83e51;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 32px;
+    font-weight: bold;
+    color: #a83e51;
+    margin: 10px 0;
+  }
+
+  .stat-label {
+    color: #666;
+    font-size: 14px;
+  }
+
+  /* Search and Pagination Styles */
+  .search-container {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .search-input-group {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+    min-width: 250px;
+  }
+
+  .search-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: #a83e51;
+    box-shadow: 0 0 5px rgba(168, 62, 81, 0.3);
+  }
+
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
+
+  .pagination {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .pagination-btn {
+    background-color: #8f2f41;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.3s ease;
+  }
+
+  .pagination-btn:hover:not(:disabled) {
+    background-color: #a83e51;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(143, 47, 65, 0.3);
+  }
+
+  .pagination-btn:disabled {
+    background-color: #d9d9d9;
+    color: #999;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .pagination-info {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    min-width: 100px;
+    text-align: center;
+  }
+
+  /* Modal Styles for Visit Form */
+  .visit-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s;
+    overflow-y: auto;
+  }
+
+  .visit-modal.show {
+    display: block;
+  }
+
+  .visit-modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 700px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    animation: slideIn 0.3s ease-out;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .visit-modal-header {
+    background: linear-gradient(135deg, #8f2f41 0%, #a83e51 100%);
+    color: white;
+    padding: 25px 30px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 20px;
+    font-weight: 700;
+    border-bottom: 3px solid #a83e51;
+  }
+
+  .visit-modal-header h2 {
+    margin: 0;
+    color: white;
+    font-size: 20px;
+  }
+
+  .close-visit-modal {
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+  }
+
+  .close-visit-modal:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateY(-50px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .form-section {
+    background: white;
+    padding: 20px 30px;
+    margin-bottom: 0;
+    border-radius: 0;
+    border-left: none;
+  }
+
+  .form-section h2 {
+    margin-top: 0;
+    color: #8f2f41;
+    font-size: 16px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-weight: 600;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  .form-row .form-group {
+    margin-bottom: 0;
+  }
+
+  .form-group label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+    font-size: 14px;
+  }
+
+  .form-group input[type="text"],
+  .form-group input[type="date"],
+  .form-group input[type="time"],
+  .form-group input[type="number"],
+  .form-group select,
+  .form-group textarea {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.3s;
+  }
+
+  .form-group input[type="text"]:focus,
+  .form-group input[type="date"]:focus,
+  .form-group input[type="time"]:focus,
+  .form-group input[type="number"]:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #a83e51;
+  }
+
+  .form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .vital-signs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+
+  .vital-sign-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .vital-sign-item label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+  }
+
+  .vital-sign-item input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  .vital-sign-item input:focus {
+    border-color: #a83e51;
+  }
+
+  .checkbox-group {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .checkbox-item input[type="radio"] {
+    cursor: pointer;
+  }
+
+  .checkbox-item label {
+    margin: 0;
+    cursor: pointer;
+    font-weight: 400;
+  }
+
+  .form-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 0;
+    justify-content: flex-end;
+    padding: 20px 30px;
+    background: #f8f9fa;
+    border-radius: 0 0 12px 12px;
+    border-top: 1px solid #ddd;
+  }
+
+  .form-buttons button,
+  .form-buttons .btn-action {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .form-buttons .btn-submit {
+    background: linear-gradient(135deg, #8f2f41 0%, #a83e51 100%);
+    color: white;
+    box-shadow: 0 4px 12px #6a1b2a;
+  }
+
+  .form-buttons .btn-submit:hover {
+    background: linear-gradient(135deg, #8f2f41 0%, #a83e51 100%);
+    transform: translateY(-2px);
+  }
+
+  .form-buttons .btn-cancel {
+    background: #6c757d;
+    color: white;
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+  }
+
+  .form-buttons .btn-cancel:hover {
+    background: #5a6268;
+    box-shadow: 0 6px 16px rgba(108, 117, 125, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .required {
+    color: #dc3545;
+  }
+
+  .info-box {
+    background: #b65a6b;
+    border-left: 4px solid #a83e51;
+    padding: 15px;
+    border-radius: 0;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: white;
+  }
+
+  .person-info {
+    background: #a83e51;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border-left: 4px solid #a83e51;
+  }
+
+  .person-info p {
+    margin: 5px 0;
+    color: #333;
+  }
+
+  .person-info strong {
+    color: white;
+  }
+</style>
+{% endblock %} {% block content %} {% if user_role == 'class_advisor' and
+advisory_class %}
+<div class="visits-container" style="max-width: 1000px">
+  <div style="margin-bottom: 20px">
+    <h2 style="margin: 0; color: #333; font-size: 1.8rem">
+      Clinic Visit Records for {{ advisory_class }}
+    </h2>
+  </div>
+
+  <!-- Visits Table -->
+  {% if visits %}
+  <div class="visits-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Date & Time</th>
+          <th>Person</th>
+          <th>Type</th>
+          <th>Chief Complaint</th>
+          <th>Diagnosis</th>
+          <th>Referral</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for visit in visits %}
+        <tr>
+          <td>
+            <strong>{{ visit.visit_date }}</strong><br />
+            <small>{{ visit.visit_time or '—' }}</small>
+          </td>
+          <td>
+            <strong>{{ visit.person_name }}</strong><br />
+            <small>{{ visit.person_code }}</small>
+          </td>
+          <td>
+            <span
+              class="person-type-badge {% if visit.person_type == 'student' %}badge-student{% else %}badge-teacher{% endif %}"
+            >
+              {{ visit.person_type|upper }}
+            </span>
+          </td>
+          <td class="complaint-text" title="{{ visit.chief_complaint }}">
+            {{ visit.chief_complaint }}
+          </td>
+          <td>
+            {% if visit.diagnosis %}
+            <small
+              >{{ visit.diagnosis[:50] }}{{ '...' if visit.diagnosis|length > 50
+              else '' }}</small
+            >
+            {% else %}
+            <small style="color: #999">—</small>
+            {% endif %}
+          </td>
+          <td>
+            {% if visit.referral_needed == 1 %}
+            <span style="color: #dc3545; font-weight: 600">✓ Yes</span>
+            {% else %}
+            <span style="color: #999">No</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button
+                type="button"
+                class="btn-view"
+                data-visit-id="{{ visit.id }}"
+                data-person-name="{{ visit.person_name }}"
+                data-visit-date="{{ visit.visit_date }}"
+                data-chief-complaint="{{ visit.chief_complaint }}"
+                data-diagnosis="{{ visit.diagnosis or '' }}"
+                data-treatment="{{ visit.treatment_provided or '' }}"
+                onclick="openViewModal(this.dataset.visitId, this.dataset.personName, this.dataset.visitDate, this.dataset.chiefComplaint, this.dataset.diagnosis, this.dataset.treatment)"
+              >
+                View
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">📭</div>
+    <h3>No clinic visit records found</h3>
+    <p>There are no clinic visit records for your section yet.</p>
+  </div>
+  {% endif %}
+</div>
+
+{% else %}
+<div class="visits-container">
+  {% if user_role == 'class_advisor' and advisory_class %}
+  <div class="class-advisor-banner">
+    📋 You are viewing clinic visit records for your section:
+    <strong>{{ advisory_class }}</strong>
+  </div>
+  {% endif %}
+
+  <div class="visits-header">
+    <h1>Clinic Visit Records</h1>
+    {% if user_role != 'class_advisor' %}
+    <button onclick="openVisitModal()" class="btn-new-visit">
+      + New Visit Record
+    </button>
+    {% endif %}
+  </div>
+
+  <!-- Statistics -->
+  <div class="stat-boxes">
+    <div class="stat-box">
+      <div class="stat-label">Total Visits</div>
+      <div class="stat-number">{{ visits|length }}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Students</div>
+      <div class="stat-number">
+        {{ visits|selectattr('person_type', 'equalto', 'student')|list|length }}
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Teachers</div>
+      <div class="stat-number">
+        {{ visits|selectattr('person_type', 'equalto', 'teacher')|list|length }}
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Referrals</div>
+      <div class="stat-number">
+        {{ visits|selectattr('referral_needed', 'equalto', 1)|list|length }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Visits Table -->
+  {% if visits %}
+  <div class="search-container">
+    <div class="search-input-group">
+      <input
+        type="text"
+        id="visitsSearch"
+        class="search-input"
+        placeholder="Search by person name, complaint, or diagnosis..."
+        onkeyup="filterVisitsTable()"
+      />
+    </div>
+  </div>
+  <div class="visits-table">
+    <table id="visitsTable">
+      <thead>
+        <tr>
+          <th>Date & Time</th>
+          <th>Person</th>
+          <th>Type</th>
+          <th>Chief Complaint</th>
+          <th>Diagnosis</th>
+          <th>Referral</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for visit in visits %}
+        <tr>
+          <td>
+            <strong>{{ visit.visit_date }}</strong><br />
+            <small>{{ visit.visit_time or '—' }}</small>
+          </td>
+          <td>
+            <strong>{{ visit.person_name }}</strong><br />
+            <small>{{ visit.person_code }}</small>
+          </td>
+          <td>
+            <span
+              class="person-type-badge {% if visit.person_type == 'student' %}badge-student{% else %}badge-teacher{% endif %}"
+            >
+              {{ visit.person_type|upper }}
+            </span>
+          </td>
+          <td class="complaint-text" title="{{ visit.chief_complaint }}">
+            {{ visit.chief_complaint }}
+          </td>
+          <td>
+            {% if visit.diagnosis %}
+            <small
+              >{{ visit.diagnosis[:50] }}{{ '...' if visit.diagnosis|length > 50
+              else '' }}</small
+            >
+            {% else %}
+            <small style="color: #999">—</small>
+            {% endif %}
+          </td>
+          <td>
+            {% if visit.referral_needed == 1 %}
+            <span style="color: #dc3545; font-weight: 600">✓ Yes</span>
+            {% else %}
+            <span style="color: #999">No</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button
+                type="button"
+                class="btn-view"
+                data-visit-id="{{ visit.id }}"
+                data-person-name="{{ visit.person_name }}"
+                data-visit-date="{{ visit.visit_date }}"
+                data-chief-complaint="{{ visit.chief_complaint }}"
+                data-diagnosis="{{ visit.diagnosis or '' }}"
+                data-treatment="{{ visit.treatment_provided or '' }}"
+                onclick="openViewModal(this.dataset.visitId, this.dataset.personName, this.dataset.visitDate, this.dataset.chiefComplaint, this.dataset.diagnosis, this.dataset.treatment)"
+              >
+                View
+              </button>
+              <button
+                type="button"
+                class="btn-delete"
+                data-visit-id="{{ visit.id }}"
+                data-person-name="{{ visit.person_name }}"
+                onclick="openDeleteModal(this.dataset.visitId, this.dataset.personName)"
+              >
+                Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if visits|length > 7 %}
+  <div id="visitsPaginationContainer" class="pagination-container">
+    <div class="pagination">
+      <button
+        id="prevVisitsBtn"
+        class="pagination-btn"
+        onclick="previousVisitsPage()"
+      >
+        ← Previous
+      </button>
+      <span class="pagination-info">
+        Page <span id="visitsCurrentPage">1</span> of
+        <span id="visitsTotalPages">1</span>
+      </span>
+      <button
+        id="nextVisitsBtn"
+        class="pagination-btn"
+        onclick="nextVisitsPage()"
+      >
+        Next →
+      </button>
+    </div>
+  </div>
+  {% endif %} {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">📭</div>
+    <h3>No clinic visit records found</h3>
+    <p>
+      Start by
+      <a
+        href="{{ url_for('clinic_visit') }}"
+        style="color: #a83e51; font-weight: 600"
+        >creating a new clinic visit record</a
+      >
+    </p>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- View Modal -->
+<div id="viewModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Clinic Visit Details</h2>
+      <button type="button" class="modal-close" onclick="closeViewModal()">
+        &times;
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="visitDetailsContainer">
+        <div class="loading">Loading visit details...</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" onclick="closeViewModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="deleteModal" class="modal">
+  <div class="modal-content modal-small">
+    <div class="modal-header">
+      <h2>Confirm Delete</h2>
+      <button type="button" class="modal-close" onclick="closeDeleteModal()">
+        &times;
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>
+        Are you sure you want to delete the clinic visit record for
+        <strong id="deletePersonName"></strong>?
+      </p>
+      <p class="warning-text">This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" onclick="closeDeleteModal()">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="btn-delete"
+        id="confirmDeleteBtn"
+        onclick="confirmDelete()"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .modal-content {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 700px;
+    animation: slideIn 0.3s ease-out;
+    max-height: 85vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-small {
+    max-width: 400px;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateY(-50px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #999;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .modal-close:hover {
+    background-color: #f0f0f0;
+    color: #333;
+  }
+
+  .modal-body {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .modal-footer {
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  /* Modal Content Styles */
+  .visit-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .detail-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .detail-section h3 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: #666;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin: 10px 0 8px 0;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 8px;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 8px 0;
+  }
+
+  .detail-label {
+    font-weight: 600;
+    color: #666;
+    min-width: 120px;
+  }
+
+  .detail-value {
+    color: #333;
+    text-align: right;
+    flex: 1;
+    word-wrap: break-word;
+  }
+
+  .detail-value.full-width {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+  }
+
+  .warning-text {
+    color: #d32f2f;
+    font-size: 0.9rem;
+    margin-top: 10px;
+  }
+
+  /* Button Styles */
+  .btn-secondary,
+  .btn-delete {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+  }
+
+  .btn-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+  }
+
+  .btn-secondary:hover {
+    background-color: #e0e0e0;
+  }
+
+  .btn-delete {
+    background-color: #d32f2f;
+    color: white;
+  }
+
+  .btn-delete:hover {
+    background-color: #b71c1c;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .modal-content {
+      width: 95%;
+      max-height: 90vh;
+    }
+
+    .visit-details {
+      grid-template-columns: 1fr;
+    }
+
+    .modal-header h2 {
+      font-size: 1.2rem;
+    }
+
+    .modal-body {
+      padding: 15px;
+    }
+
+    .modal-footer {
+      padding: 15px;
+      flex-wrap: wrap;
+    }
+  }
+</style>
+
+<!-- New Visit Record Modal -->
+<div id="visitModal" class="visit-modal">
+  <div class="visit-modal-content">
+    <div class="visit-modal-header">
+      <h2>Clinic Visit Record</h2>
+      <button class="close-visit-modal" onclick="closeVisitModal()">
+        &times;
+      </button>
+    </div>
+
+    <div class="info-box">
+      Please fill out all required fields (<span class="required">*</span>)
+      accurately. This information will be stored securely in the health records
+      system.
+    </div>
+
+    <form
+      id="clinicVisitForm"
+      method="POST"
+      action="{{ url_for('clinic_visit') }}"
+      onsubmit="return validateClinicVisitForm()"
+    >
+      <!-- Person Selection Section -->
+      <div class="form-section">
+        <h2>Patient Information</h2>
+
+        <div class="form-group">
+          <label for="personType"
+            >Person Type <span class="required">*</span></label
+          >
+          <select id="personType" name="person_type" required>
+            <option value="">Select person type...</option>
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="personId"
+            >Select Person <span class="required">*</span></label
+          >
+          <select id="personId" name="person_id" required>
+            <option value="">First select person type above...</option>
+          </select>
+        </div>
+
+        <div id="personInfoDisplay" class="person-info" style="display: none">
+          <p><strong>Name:</strong> <span id="personName"></span></p>
+          <p><strong>ID:</strong> <span id="personCode"></span></p>
+          <p><strong>Class/Dept:</strong> <span id="personClass"></span></p>
+        </div>
+      </div>
+
+      <!-- Visit Details Section -->
+      <div class="form-section">
+        <h2>Visit Details</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="visitDate"
+              >Visit Date <span class="required">*</span></label
+            >
+            <input type="date" id="visitDate" name="visit_date" required />
+          </div>
+
+          <div class="form-group">
+            <label for="visitTime"
+              >Visit Time <span class="required">*</span></label
+            >
+            <input type="time" id="visitTime" name="visit_time" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="nurseName">Nurse/Staff Name</label>
+          <input
+            type="text"
+            id="nurseName"
+            name="nurse_name"
+            placeholder="Name of healthcare provider"
+            minlength="3"
+            maxlength="100"
+            pattern="[a-zA-Z\s]+"
+          />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="patientSex">Sex <span class="required">*</span></label>
+            <select id="patientSex" name="patient_sex" required>
+              <option value="">Select...</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="patientAge"
+              >Age (years) <span class="required">*</span></label
+            >
+            <input
+              type="number"
+              id="patientAge"
+              name="patient_age"
+              placeholder="e.g., 18"
+              min="1"
+              max="120"
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Vital Signs Section -->
+      <div class="form-section">
+        <h2>Vital Signs</h2>
+
+        <div class="vital-signs-grid">
+          <div class="vital-sign-item">
+            <label for="temperature">Temperature (°C)</label>
+            <input
+              type="number"
+              id="temperature"
+              name="temperature"
+              placeholder="e.g., 37.5"
+              step="0.1"
+              min="35"
+              max="42"
+              title="Temperature should be between 35°C and 42°C"
+            />
+          </div>
+
+          <div class="vital-sign-item">
+            <label for="bloodPressure">Blood Pressure (mmHg)</label>
+            <input
+              type="text"
+              id="bloodPressure"
+              name="blood_pressure"
+              placeholder="e.g., 120/80"
+              pattern="\d+/\d+"
+              title="Please enter blood pressure in format: 120/80"
+            />
+          </div>
+
+          <div class="vital-sign-item">
+            <label for="heartRate">Heart Rate (bpm)</label>
+            <input
+              type="number"
+              id="heartRate"
+              name="heart_rate"
+              placeholder="e.g., 72"
+              min="30"
+              max="200"
+              title="Heart rate should be between 30 and 200 bpm"
+            />
+          </div>
+
+          <div class="vital-sign-item">
+            <label for="respiratoryRate">Respiratory Rate (breaths/min)</label>
+            <input
+              type="number"
+              id="respiratoryRate"
+              name="respiratory_rate"
+              placeholder="e.g., 16"
+              min="8"
+              max="60"
+              title="Respiratory rate should be between 8 and 60 breaths/min"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Chief Complaint Section -->
+      <div class="form-section">
+        <h2>Chief Complaint</h2>
+
+        <div class="form-group">
+          <label for="chiefComplaint"
+            >Reason for Visit <span class="required">*</span></label
+          >
+          <textarea
+            id="chiefComplaint"
+            name="chief_complaint"
+            placeholder="Describe the main reason for the clinic visit..."
+            required
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Physical Examination Section -->
+      <div class="form-section">
+        <h2>Physical Examination</h2>
+
+        <div class="form-group">
+          <label for="physicalExamination">Observations and Findings</label>
+          <textarea
+            id="physicalExamination"
+            name="physical_examination"
+            placeholder="Document physical examination findings, observations, etc..."
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Diagnosis/Assessment Section -->
+      <div class="form-section">
+        <h2>Diagnosis/Assessment</h2>
+
+        <div class="form-group">
+          <label for="diagnosis">Preliminary Diagnosis</label>
+          <textarea
+            id="diagnosis"
+            name="diagnosis"
+            placeholder="Medical diagnosis or condition identified..."
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="assessment">Assessment</label>
+          <textarea
+            id="assessment"
+            name="assessment"
+            placeholder="Overall health assessment and findings..."
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Treatment Section -->
+      <div class="form-section">
+        <h2>Treatment Provided</h2>
+
+        <div class="form-group">
+          <label for="medicationsGiven">Medications Given</label>
+          <textarea
+            id="medicationsGiven"
+            name="medications_given"
+            placeholder="List any medications administered..."
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="firstAid">First Aid Provided</label>
+          <textarea
+            id="firstAid"
+            name="first_aid_provided"
+            placeholder="Describe any first aid or emergency treatment..."
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="treatmentProvided">General Treatment</label>
+          <textarea
+            id="treatmentProvided"
+            name="treatment_provided"
+            placeholder="Other treatments or procedures performed..."
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="recommendations">Recommendations</label>
+          <textarea
+            id="recommendations"
+            name="recommendations"
+            placeholder="Recommendations for continued care, rest, or follow-up..."
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Referral Section -->
+      <div class="form-section">
+        <h2>Referral</h2>
+
+        <div class="form-group">
+          <label>Referral Needed?</label>
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input
+                type="radio"
+                id="referralNo"
+                name="referral_needed"
+                value="0"
+                checked
+              />
+              <label for="referralNo">No</label>
+            </div>
+            <div class="checkbox-item">
+              <input
+                type="radio"
+                id="referralYes"
+                name="referral_needed"
+                value="1"
+              />
+              <label for="referralYes">Yes</label>
+            </div>
+          </div>
+        </div>
+
+        <div id="referralDetails" style="display: none">
+          <div class="form-group">
+            <label for="referralType">Type of Referral</label>
+            <select id="referralType" name="referral_type">
+              <option value="">Select referral type...</option>
+              <option value="doctor">Doctor/Physician</option>
+              <option value="hospital">Hospital</option>
+              <option value="specialist">Specialist</option>
+              <option value="home">Send Home</option>
+              <option value="parent">Contact Parent/Guardian</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="referralTo">Referred To</label>
+            <input
+              type="text"
+              id="referralTo"
+              name="referral_to"
+              placeholder="Name of facility, doctor, or institution..."
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Notes Section -->
+      <div class="form-section">
+        <h2>Additional Notes</h2>
+
+        <div class="form-group">
+          <label for="visitNotes">Visit Notes</label>
+          <textarea
+            id="visitNotes"
+            name="visit_notes"
+            placeholder="Any additional observations or special instructions..."
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Follow-up Required?</label>
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input
+                type="radio"
+                id="followUpNo"
+                name="follow_up_required"
+                value="0"
+                checked
+              />
+              <label for="followUpNo">No</label>
+            </div>
+            <div class="checkbox-item">
+              <input
+                type="radio"
+                id="followUpYes"
+                name="follow_up_required"
+                value="1"
+              />
+              <label for="followUpYes">Yes</label>
+            </div>
+          </div>
+        </div>
+
+        <div id="followUpDetails" style="display: none">
+          <div class="form-group">
+            <label for="followUpDate">Follow-up Date</label>
+            <input type="date" id="followUpDate" name="follow_up_date" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Buttons -->
+      <div class="form-buttons">
+        <button type="submit" class="btn-submit">
+          Save Clinic Visit Record
+        </button>
+        <button type="button" class="btn-cancel" onclick="closeVisitModal()">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Hidden data container for student and teacher information -->
+<div id="peopleDataContainer" style="display: none">
+  <div id="studentsData">
+    {% for student in students %}
+    <div
+      class="student-data"
+      data-id="{{ student.id }}"
+      data-name="{{ student.name }}"
+      data-code="{{ student.studentLRN }}"
+      data-class="{{ student.class }}"
+    ></div>
+    {% endfor %}
+  </div>
+  <div id="teachersData">
+    {% for teacher in teachers %}
+    <div
+      class="teacher-data"
+      data-id="{{ teacher.id }}"
+      data-name="{{ teacher.name }}"
+      data-code="{{ teacher.teacherID }}"
+      data-class="{{ teacher.department }}"
+    ></div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  // Store current visit ID for delete confirmation
+  let currentDeleteVisitId = null;
+
+  // Global data objects for people
+  let studentsData = {};
+  let teachersData = {};
+
+  // Initialize people data on page load
+  function initializePeopleData() {
+    // First try to get data from embedded elements
+    document.querySelectorAll(".student-data").forEach((el) => {
+      studentsData[el.dataset.id] = {
+        name: el.dataset.name,
+        code: el.dataset.code,
+        class: el.dataset.class,
+      };
+    });
+
+    document.querySelectorAll(".teacher-data").forEach((el) => {
+      teachersData[el.dataset.id] = {
+        name: el.dataset.name,
+        code: el.dataset.code,
+        class: el.dataset.class,
+      };
+    });
+
+    // If no data found, fetch from API
+    if (
+      Object.keys(studentsData).length === 0 &&
+      Object.keys(teachersData).length === 0
+    ) {
+      fetchPeopleDataFromAPI();
+    }
+  }
+
+  // Fetch people data via API
+  function fetchPeopleDataFromAPI() {
+    console.log("Fetching people data from API...");
+
+    // Fetch students
+    fetch("/api/students")
+      .then((response) => {
+        console.log("Students response status:", response.status);
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Students data:", data);
+        if (data.success && data.students) {
+          data.students.forEach((student) => {
+            studentsData[student.id] = {
+              name: student.name,
+              code: student.studentLRN || student.id,
+              class: student.class || "N/A",
+            };
+          });
+          console.log("Loaded students:", Object.keys(studentsData).length);
+        } else {
+          console.error("Failed to fetch students:", data.message);
+        }
+      })
+      .catch((err) => console.error("Error fetching students:", err));
+
+    // Fetch teachers
+    fetch("/api/teachers")
+      .then((response) => {
+        console.log("Teachers response status:", response.status);
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Teachers data:", data);
+        if (data.success && data.teachers) {
+          data.teachers.forEach((teacher) => {
+            teachersData[teacher.id] = {
+              name: teacher.name,
+              code: teacher.teacherID || teacher.id,
+              class: teacher.department || "N/A",
+            };
+          });
+          console.log("Loaded teachers:", Object.keys(teachersData).length);
+        } else {
+          console.error("Failed to fetch teachers:", data.message);
+        }
+      })
+      .catch((err) => console.error("Error fetching teachers:", err));
+  }
+
+  // Initialize on page load (moved below for better organization)
+
+  // Open View Modal
+  function openViewModal(
+    visitId,
+    personName,
+    visitDate,
+    chiefComplaint,
+    diagnosis,
+    treatment
+  ) {
+    const modal = document.getElementById("viewModal");
+    const container = document.getElementById("visitDetailsContainer");
+
+    // Show loading state
+    container.innerHTML = '<div class="loading">Loading visit details...</div>';
+    modal.classList.add("show");
+
+    // Fetch full visit details via AJAX
+    fetch(`/api/clinic-visit/${visitId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          container.innerHTML = buildVisitDetailsHTML(data.visit);
+        } else {
+          container.innerHTML = `<div class="error-message">Error loading visit details: ${data.message}</div>`;
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching visit details:", error);
+        container.innerHTML = `<div class="error-message">Error loading visit details. Please try again.</div>`;
+      });
+  }
+
+  // Close View Modal
+  function closeViewModal() {
+    document.getElementById("viewModal").classList.remove("show");
+  }
+
+  // Open Delete Modal
+  function openDeleteModal(visitId, personName) {
+    currentDeleteVisitId = visitId;
+    document.getElementById("deletePersonName").textContent = personName;
+    document.getElementById("deleteModal").classList.add("show");
+  }
+
+  // Close Delete Modal
+  function closeDeleteModal() {
+    document.getElementById("deleteModal").classList.remove("show");
+    currentDeleteVisitId = null;
+  }
+
+  // Confirm and Submit Delete
+  function confirmDelete() {
+    if (!currentDeleteVisitId) return;
+
+    const deleteBtn = document.getElementById("confirmDeleteBtn");
+    deleteBtn.disabled = true;
+    deleteBtn.textContent = "Deleting...";
+
+    // Submit delete via AJAX
+    fetch(`/clinic-visit/${currentDeleteVisitId}/delete`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          // Success - reload the page
+          window.location.reload();
+        } else {
+          throw new Error("Delete failed");
+        }
+      })
+      .catch((error) => {
+        console.error("Error deleting visit:", error);
+        deleteBtn.disabled = false;
+        deleteBtn.textContent = "Delete";
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Error deleting clinic visit. Please try again.",
+        });
+      });
+  }
+
+  // Build HTML for visit details
+  function buildVisitDetailsHTML(visit) {
+    return `
+    <div class="visit-details">
+      <div class="detail-section">
+        <h3>Patient Information</h3>
+        <div class="detail-row">
+          <span class="detail-label">Name:</span>
+          <span class="detail-value">${escapeHtml(visit.person_name)}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Type:</span>
+          <span class="detail-value">${escapeHtml(visit.person_type)}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Visit Date:</span>
+          <span class="detail-value">${escapeHtml(visit.visit_date)}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Visit Time:</span>
+          <span class="detail-value">${escapeHtml(visit.visit_time)}</span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Nurse Information</h3>
+        <div class="detail-row">
+          <span class="detail-label">Nurse:</span>
+          <span class="detail-value">${escapeHtml(visit.nurse_name)}</span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Vital Signs</h3>
+        <div class="detail-row">
+          <span class="detail-label">Temperature:</span>
+          <span class="detail-value">${
+            visit.temperature ? visit.temperature + "°C" : "N/A"
+          }</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Blood Pressure:</span>
+          <span class="detail-value">${escapeHtml(
+            visit.blood_pressure || "N/A"
+          )}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Heart Rate:</span>
+          <span class="detail-value">${
+            visit.heart_rate ? visit.heart_rate + " bpm" : "N/A"
+          }</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Respiratory Rate:</span>
+          <span class="detail-value">${
+            visit.respiratory_rate
+              ? visit.respiratory_rate + " breaths/min"
+              : "N/A"
+          }</span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Clinical Findings</h3>
+        <div class="detail-row">
+          <span class="detail-label">Chief Complaint:</span>
+          <span class="detail-value full-width">${escapeHtml(
+            visit.chief_complaint
+          )}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Physical Exam:</span>
+          <span class="detail-value full-width">${escapeHtml(
+            visit.physical_examination || "N/A"
+          )}</span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Assessment & Diagnosis</h3>
+        <div class="detail-row">
+          <span class="detail-label">Diagnosis:</span>
+          <span class="detail-value full-width">${escapeHtml(
+            visit.diagnosis || "N/A"
+          )}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Assessment:</span>
+          <span class="detail-value full-width">${escapeHtml(
+            visit.assessment || "N/A"
+          )}</span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Treatment & Recommendations</h3>
+        <div class="detail-row">
+          <span class="detail-label">Treatment:</span>
+          <span class="detail-value full-width">${escapeHtml(
+            visit.treatment_provided || "N/A"
+          )}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Medications:</span>
+          <span class="detail-value full-width">${escapeHtml(
+            visit.medications_given || "N/A"
+          )}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">First Aid:</span>
+          <span class="detail-value full-width">${escapeHtml(
+            visit.first_aid_provided || "N/A"
+          )}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Recommendations:</span>
+          <span class="detail-value full-width">${escapeHtml(
+            visit.recommendations || "N/A"
+          )}</span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Referral & Follow-up</h3>
+        <div class="detail-row">
+          <span class="detail-label">Referral Needed:</span>
+          <span class="detail-value">${
+            visit.referral_needed ? "Yes" : "No"
+          }</span>
+        </div>
+        ${
+          visit.referral_needed
+            ? `
+          <div class="detail-row">
+            <span class="detail-label">Referral Type:</span>
+            <span class="detail-value full-width">${escapeHtml(
+              visit.referral_type || "N/A"
+            )}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Referral To:</span>
+            <span class="detail-value full-width">${escapeHtml(
+              visit.referral_to || "N/A"
+            )}</span>
+          </div>
+        `
+            : ""
+        }
+        <div class="detail-row">
+          <span class="detail-label">Follow-up Required:</span>
+          <span class="detail-value">${
+            visit.follow_up_required ? "Yes" : "No"
+          }</span>
+        </div>
+        ${
+          visit.follow_up_required
+            ? `
+          <div class="detail-row">
+            <span class="detail-label">Follow-up Date:</span>
+            <span class="detail-value">${escapeHtml(
+              visit.follow_up_date || "N/A"
+            )}</span>
+          </div>
+        `
+            : ""
+        }
+      </div>
+
+      <div class="detail-section">
+        <h3>Additional Notes</h3>
+        <div class="detail-row">
+          <span class="detail-label">Visit Notes:</span>
+          <span class="detail-value full-width">${escapeHtml(
+            visit.visit_notes || "N/A"
+          )}</span>
+        </div>
+      </div>
+    </div>
+  `;
+  }
+
+  // Escape HTML to prevent XSS
+  function escapeHtml(text) {
+    if (!text) return "";
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Close modals when clicking outside
+  window.addEventListener("click", function (event) {
+    const viewModal = document.getElementById("viewModal");
+    const deleteModal = document.getElementById("deleteModal");
+
+    if (event.target === viewModal) {
+      closeViewModal();
+    }
+    if (event.target === deleteModal) {
+      closeDeleteModal();
+    }
+  });
+
+  // Close modals on ESC key
+  window.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+      closeViewModal();
+      closeDeleteModal();
+      closeVisitModal();
+    }
+  });
+
+  // New Visit Modal Functions
+  function openVisitModal() {
+    document.getElementById("visitModal").classList.add("show");
+    // Reset form and set current date/time
+    resetVisitForm();
+    // Reload data on modal open
+    loadPeopleData();
+  }
+
+  function loadPeopleData() {
+    // Clear and rebuild data objects
+    studentsData = {};
+    teachersData = {};
+
+    // Try embedded data first
+    document.querySelectorAll(".student-data").forEach((el) => {
+      studentsData[el.dataset.id] = {
+        name: el.dataset.name,
+        code: el.dataset.code,
+        class: el.dataset.class,
+      };
+    });
+
+    document.querySelectorAll(".teacher-data").forEach((el) => {
+      teachersData[el.dataset.id] = {
+        name: el.dataset.name,
+        code: el.dataset.code,
+        class: el.dataset.class,
+      };
+    });
+
+    // If still no data, fetch from API
+    if (
+      Object.keys(studentsData).length === 0 &&
+      Object.keys(teachersData).length === 0
+    ) {
+      fetchPeopleDataFromAPI();
+    }
+  }
+
+  function closeVisitModal() {
+    document.getElementById("visitModal").classList.remove("show");
+  }
+
+  // Close modal when clicking outside the modal content
+  window.addEventListener("click", function (event) {
+    const visitModal = document.getElementById("visitModal");
+    if (event.target === visitModal) {
+      closeVisitModal();
+    }
+  });
+
+  function resetVisitForm() {
+    document.getElementById("clinicVisitForm").reset();
+    const today = new Date().toISOString().split("T")[0];
+    const now = new Date().toTimeString().slice(0, 5);
+    document.getElementById("visitDate").value = today;
+    document.getElementById("visitTime").value = now;
+    document.getElementById("personInfoDisplay").style.display = "none";
+    document.getElementById("referralDetails").style.display = "none";
+    document.getElementById("followUpDetails").style.display = "none";
+  }
+
+  // Build data objects from hidden elements
+  // (Already initialized at page load via initializePeopleData())
+
+  // Handle person type change
+  function setupPersonTypeChangeListener() {
+    const personTypeSelect = document.getElementById("personType");
+    if (!personTypeSelect) return;
+
+    personTypeSelect.addEventListener("change", function (e) {
+      const personSelect = document.getElementById("personId");
+      const personInfo = document.getElementById("personInfoDisplay");
+
+      if (!personSelect || !personInfo) return;
+
+      personSelect.innerHTML = '<option value="">Select person...</option>';
+      personInfo.style.display = "none";
+
+      console.log("Person type changed to:", e.target.value);
+      console.log("Students available:", Object.keys(studentsData).length);
+      console.log("Teachers available:", Object.keys(teachersData).length);
+
+      if (e.target.value === "student") {
+        if (Object.keys(studentsData).length === 0) {
+          personSelect.innerHTML +=
+            '<option value="">No students available</option>';
+          return;
+        }
+        Object.entries(studentsData).forEach(([id, data]) => {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = `${data.name} (${data.code})`;
+          personSelect.appendChild(option);
+        });
+      } else if (e.target.value === "teacher") {
+        if (Object.keys(teachersData).length === 0) {
+          personSelect.innerHTML +=
+            '<option value="">No teachers available</option>';
+          return;
+        }
+        Object.entries(teachersData).forEach(([id, data]) => {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = `${data.name} (${data.code})`;
+          personSelect.appendChild(option);
+        });
+      }
+    });
+  }
+
+  // Setup event listeners after DOM is ready
+  document.addEventListener("DOMContentLoaded", function () {
+    initializePeopleData();
+    setupPersonTypeChangeListener();
+  });
+
+  // Handle person selection
+  document.getElementById("personId").addEventListener("change", function (e) {
+    const personType = document.getElementById("personType").value;
+    const personInfo = document.getElementById("personInfoDisplay");
+
+    if (e.target.value) {
+      const data =
+        personType === "student"
+          ? studentsData[e.target.value]
+          : teachersData[e.target.value];
+      if (data) {
+        document.getElementById("personName").textContent = data.name;
+        document.getElementById("personCode").textContent = data.code;
+        document.getElementById("personClass").textContent = data.class;
+        personInfo.style.display = "block";
+      }
+    } else {
+      personInfo.style.display = "none";
+    }
+  });
+
+  // Show/hide referral details
+  document
+    .querySelectorAll('input[name="referral_needed"]')
+    .forEach((radio) => {
+      radio.addEventListener("change", function () {
+        document.getElementById("referralDetails").style.display =
+          this.value === "1" ? "block" : "none";
+      });
+    });
+
+  // Show/hide follow-up details
+  document
+    .querySelectorAll('input[name="follow_up_required"]')
+    .forEach((radio) => {
+      radio.addEventListener("change", function () {
+        document.getElementById("followUpDetails").style.display =
+          this.value === "1" ? "block" : "none";
+      });
+    });
+
+  function validateClinicVisitForm() {
+    const form = document.getElementById("clinicVisitForm");
+    // Basic validation - the form's HTML5 validation will handle required fields
+    if (!form.checkValidity()) {
+      alert("Please fill out all required fields correctly.");
+      return false;
+    }
+    return true;
+  }
+
+  // Pagination and Filter Functions for Visits Table
+  const itemsPerPage = 7;
+  let currentVisitsPage = 1;
+
+  function filterVisitsTable() {
+    const searchInput = document
+      .getElementById("visitsSearch")
+      .value.toLowerCase();
+    const table = document.getElementById("visitsTable");
+    const rows = table
+      .getElementsByTagName("tbody")[0]
+      .getElementsByTagName("tr");
+    let visibleCount = 0;
+
+    for (let i = 0; i < rows.length; i++) {
+      const personCell = rows[i].getElementsByTagName("td")[1];
+      const complaintCell = rows[i].getElementsByTagName("td")[3];
+      const diagnosisCell = rows[i].getElementsByTagName("td")[4];
+      if (personCell && complaintCell && diagnosisCell) {
+        const personValue = personCell.textContent.toLowerCase();
+        const complaintValue = complaintCell.textContent.toLowerCase();
+        const diagnosisValue = diagnosisCell.textContent.toLowerCase();
+        if (
+          personValue.includes(searchInput) ||
+          complaintValue.includes(searchInput) ||
+          diagnosisValue.includes(searchInput)
+        ) {
+          rows[i].style.display = "";
+          visibleCount++;
+        } else {
+          rows[i].style.display = "none";
+        }
+      }
+    }
+
+    // Reset to page 1 when filtering
+    currentVisitsPage = 1;
+    if (document.getElementById("visitsPaginationContainer")) {
+      paginateVisits(1);
+    }
+  }
+
+  function paginateVisits(page) {
+    const table = document.getElementById("visitsTable");
+    const rows = Array.from(
+      table.getElementsByTagName("tbody")[0].getElementsByTagName("tr")
+    ).filter((row) => row.style.display !== "none");
+
+    const totalPages = Math.ceil(rows.length / itemsPerPage);
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+
+    // Hide all rows first
+    table
+      .getElementsByTagName("tbody")[0]
+      .getElementsByTagName("tr")
+      .forEach((row) => {
+        if (row.style.display !== "none") {
+          row.style.display = "none";
+        }
+      });
+
+    // Show only rows for current page
+    let visibleIndex = 0;
+    Array.from(
+      table.getElementsByTagName("tbody")[0].getElementsByTagName("tr")
+    ).forEach((row) => {
+      if (row.querySelector("td")) {
+        const personCell = row.getElementsByTagName("td")[1];
+        if (
+          personCell &&
+          personCell.textContent.length > 0 &&
+          row.style.display !== "none"
+        ) {
+          if (visibleIndex >= startIndex && visibleIndex < endIndex) {
+            row.style.display = "";
+          }
+          visibleIndex++;
+        } else if (row.style.display === "") {
+          if (visibleIndex >= startIndex && visibleIndex < endIndex) {
+            row.style.display = "";
+          } else {
+            row.style.display = "none";
+          }
+          visibleIndex++;
+        }
+      }
+    });
+
+    // Update pagination display
+    if (document.getElementById("visitsCurrentPage")) {
+      document.getElementById("visitsCurrentPage").textContent = page;
+      document.getElementById("visitsTotalPages").textContent = totalPages;
+      document.getElementById("prevVisitsBtn").disabled = page === 1;
+      document.getElementById("nextVisitsBtn").disabled = page === totalPages;
+    }
+
+    currentVisitsPage = page;
+  }
+
+  function previousVisitsPage() {
+    if (currentVisitsPage > 1) {
+      paginateVisits(currentVisitsPage - 1);
+    }
+  }
+
+  function nextVisitsPage() {
+    const table = document.getElementById("visitsTable");
+    const rows = Array.from(
+      table.getElementsByTagName("tbody")[0].getElementsByTagName("tr")
+    ).filter((row) => row.style.display !== "none");
+    const totalPages = Math.ceil(rows.length / itemsPerPage);
+    if (currentVisitsPage < totalPages) {
+      paginateVisits(currentVisitsPage + 1);
+    }
+  }
+
+  // Initialize pagination on page load
+  document.addEventListener("DOMContentLoaded", function () {
+    const visitsTable = document.getElementById("visitsTable");
+    if (visitsTable && document.getElementById("visitsPaginationContainer")) {
+      paginateVisits(1);
+    }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% endblock %}

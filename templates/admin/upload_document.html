@@ -1,0 +1,522 @@
+{% extends "shared/base.html" %}
+
+{% block extra_css %}
+<style>
+  .upload-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+  }
+
+  .upload-card {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #a83e51;
+  }
+
+  .upload-card h1 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 2rem;
+  }
+
+  .upload-card .subtitle {
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 0.95rem;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #a83e51;
+    box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
+  }
+
+  .form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .file-input-wrapper input {
+    position: absolute;
+    left: -9999px;
+  }
+
+  .file-input-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+    border: 2px dashed #a83e51;
+    border-radius: 8px;
+    background: rgba(255, 107, 157, 0.05);
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 600;
+    color: #ff6b9d;
+  }
+
+  .file-input-label:hover {
+    background: rgba(255, 107, 157, 0.1);
+  }
+
+  .file-input-label.dragover {
+    background: rgba(255, 107, 157, 0.2);
+    border-color: #a83e51;
+    transform: scale(1.02);
+  }
+
+  .file-name-display {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #333;
+    display: none;
+  }
+
+  .file-name-display.show {
+    display: block;
+  }
+
+  .helper-text {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 5px;
+  }
+
+  .two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+
+  .form-group.full {
+    grid-column: 1 / -1;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #a83e51, #a83e51);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px #d8a1ab;
+    
+  }
+
+  .btn-secondary {
+    background: #f0f0f0;
+    color: #333;
+  }
+
+  .btn-secondary:hover {
+    background: #e0e0e0;
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .alert {
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: none;
+  }
+
+  .alert.success {
+    background: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+  }
+
+  .alert.error {
+    background: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+  }
+
+  .alert.show {
+    display: block;
+  }
+
+  .progress-bar {
+    margin: 20px 0;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+    display: none;
+  }
+
+  .progress-bar.show {
+    display: block;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #8f2f41, #a83e51);
+    width: 0%;
+    transition: width 0.3s;
+  }
+
+  .info-box {
+    background: linear-gradient(135deg, rgba(255, 107, 157, 0.1), rgba(255, 139, 171, 0.1));
+    border-left: 4px solid #a83e51;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    color: #333;
+  }
+
+  .info-box strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #a83e51;
+  }
+
+  @media (max-width: 600px) {
+    .upload-container {
+      margin: 20px auto;
+      padding: 10px;
+    }
+
+    .upload-card {
+      padding: 20px;
+    }
+
+    .two-column {
+      grid-template-columns: 1fr;
+    }
+
+    .btn-group {
+      flex-direction: column-reverse;
+    }
+
+    .upload-card h1 {
+      font-size: 1.5rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+  <div class="upload-card">
+    <h1> Upload Document</h1>
+    <p class="subtitle">Upload and store sensitive documents, personal records, and important files</p>
+
+    <div class="info-box">
+      <strong> Information:</strong>
+      Maximum file size: 10MB | Allowed formats: PDF, Images (JPG, PNG, GIF), Office files (DOC, DOCX, XLS, XLSX)
+    </div>
+
+    <div class="alert" id="successAlert"></div>
+    <div class="alert error" id="errorAlert"></div>
+
+    <form id="uploadForm" enctype="multipart/form-data" onsubmit="return validateUploadForm()">
+      <!-- Hidden data storage for lists -->
+      <div id="dataContainer" style="display: none;"
+        data-students="{{ students|tojson|replace('\"', '&quot;') }}"
+        data-teachers="{{ teachers|tojson|replace('\"', '&quot;') }}">
+      </div>
+      
+      <!-- Document Name -->
+      <div class="form-group">
+        <label for="documentName">Document Name *</label>
+        <input type="text" id="documentName" name="document_name" placeholder="e.g., Medical Certificate, Birth Certificate" required minlength="3" maxlength="150">
+        <div class="helper-text">A descriptive name for the document</div>
+      </div>
+
+      <!-- Document Type -->
+      <div class="form-group">
+        <label for="documentType">Document Type *</label>
+        <select id="documentType" name="document_type" required>
+          <option value="">-- Select Type --</option>
+          <option value="medical">Medical Record</option>
+          <option value="identification">Identification</option>
+          <option value="certificate">Certificate</option>
+          <option value="vaccination">Vaccination Record</option>
+          <option value="consent">Consent Form</option>
+          <option value="emergency">Emergency Contact Form</option>
+          <option value="prescription">Prescription</option>
+          <option value="report">Medical Report</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <!-- Sensitivity Level -->
+      <div class="form-group">
+        <label for="sensitivityLevel">Sensitivity Level *</label>
+        <select id="sensitivityLevel" name="sensitivity_level" required>
+          <option value="confidential">Confidential (Highest Privacy)</option>
+          <option value="internal">Internal Only</option>
+          <option value="public">Public (Lowest Privacy)</option>
+        </select>
+        <div class="helper-text">How sensitive is this document?</div>
+      </div>
+
+      <!-- Link to Person -->
+      <div class="form-group">
+        <label for="personType">Link to (Optional)</label>
+        <select id="personType" name="person_type" onchange="updatePersonSelect()">
+          <option value="">-- Not linked --</option>
+          <option value="student">Student</option>
+          <option value="teacher">Teacher</option>
+        </select>
+      </div>
+
+      <!-- Person ID -->
+      <div class="form-group" id="personIdGroup" style="display: none;">
+        <label for="personId">Select Person</label>
+        <select id="personId" name="person_id">
+          <option value="">-- Choose --</option>
+        </select>
+      </div>
+
+      <!-- File Upload -->
+      <div class="form-group">
+        <label>File Upload *</label>
+        <div class="file-input-wrapper">
+          <label for="fileInput" class="file-input-label" id="fileLabel">
+            <span> Click to select file or drag and drop</span>
+          </label>
+          <input type="file" id="fileInput" name="file" required accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.xls,.xlsx">
+          <div class="file-name-display" id="fileName"></div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="description">Description (Optional)</label>
+        <textarea id="description" name="description" placeholder="Add any notes or description about this document..."></textarea>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="btn-group">
+        <a href="{{ url_for('document_management') }}" class="btn btn-secondary">← Cancel</a>
+        <button type="submit" class="btn btn-primary" id="submitBtn">Upload Document</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Get lists from data container
+const dataContainer = document.getElementById('dataContainer');
+let studentsList = [];
+let teachersList = [];
+
+if (dataContainer) {
+  try {
+    const studentsData = dataContainer.getAttribute('data-students');
+    const teachersData = dataContainer.getAttribute('data-teachers');
+    if (studentsData) studentsList = JSON.parse(studentsData);
+    if (teachersData) teachersList = JSON.parse(teachersData);
+  } catch (e) {
+    console.error('Error parsing person lists:', e);
+  }
+}
+
+// File input handling
+const fileInput = document.getElementById('fileInput');
+const fileLabel = document.getElementById('fileLabel');
+const fileNameDisplay = document.getElementById('fileName');fileInput.addEventListener('change', function() {
+  if (this.files.length > 0) {
+    const fileName = this.files[0].name;
+    const fileSize = (this.files[0].size / 1024).toFixed(2);
+    fileNameDisplay.textContent = `✓ ${fileName} (${fileSize} KB)`;
+    fileNameDisplay.classList.add('show');
+  } else {
+    fileNameDisplay.classList.remove('show');
+  }
+});
+
+// Drag and drop
+fileLabel.addEventListener('dragover', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  this.classList.add('dragover');
+});
+
+fileLabel.addEventListener('dragleave', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  this.classList.remove('dragover');
+});
+
+fileLabel.addEventListener('drop', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  this.classList.remove('dragover');
+  
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    fileInput.files = files;
+    fileInput.dispatchEvent(new Event('change'));
+  }
+});
+
+// Update person select dropdown
+function updatePersonSelect() {
+  const personType = document.getElementById('personType').value;
+  const personIdGroup = document.getElementById('personIdGroup');
+  const personId = document.getElementById('personId');
+  
+  personId.innerHTML = '<option value="">-- Choose --</option>';
+  
+  if (personType === 'student') {
+    personIdGroup.style.display = 'block';
+    studentsList.forEach(student => {
+      const option = document.createElement('option');
+      option.value = student.id;
+      option.textContent = student.name;
+      personId.appendChild(option);
+    });
+  } else if (personType === 'teacher') {
+    personIdGroup.style.display = 'block';
+    teachersList.forEach(teacher => {
+      const option = document.createElement('option');
+      option.value = teacher.id;
+      option.textContent = teacher.name;
+      personId.appendChild(option);
+    });
+  } else {
+    personIdGroup.style.display = 'none';
+  }
+}
+
+// Form submission
+document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const successAlert = document.getElementById('successAlert');
+  const errorAlert = document.getElementById('errorAlert');
+  const progressBar = document.getElementById('progressBar');
+  const submitBtn = document.getElementById('submitBtn');
+  
+  // Clear alerts
+  successAlert.classList.remove('show');
+  errorAlert.classList.remove('show');
+  
+  const formData = new FormData(this);
+  
+  try {
+    submitBtn.disabled = true;
+    progressBar.classList.add('show');
+    
+    const xhr = new XMLHttpRequest();
+    
+    xhr.upload.addEventListener('progress', function(e) {
+      if (e.lengthComputable) {
+        const percentComplete = (e.loaded / e.total) * 100;
+        document.getElementById('progressFill').style.width = percentComplete + '%';
+      }
+    });
+    
+    xhr.addEventListener('load', function() {
+      if (xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText);
+        if (response.success) {
+          successAlert.textContent = '✓ ' + response.message;
+          successAlert.classList.add('show', 'success');
+          document.getElementById('uploadForm').reset();
+          fileNameDisplay.classList.remove('show');
+          setTimeout(() => {
+            window.location.href = '{{ url_for("document_management") }}';
+          }, 2000);
+        } else {
+          errorAlert.textContent = '✗ ' + response.message;
+          errorAlert.classList.add('show');
+        }
+      } else {
+        const response = JSON.parse(xhr.responseText);
+        errorAlert.textContent = '✗ ' + response.message;
+        errorAlert.classList.add('show');
+      }
+      submitBtn.disabled = false;
+      progressBar.classList.remove('show');
+    });
+    
+    xhr.addEventListener('error', function() {
+      errorAlert.textContent = '✗ An error occurred while uploading the file';
+      errorAlert.classList.add('show');
+      submitBtn.disabled = false;
+      progressBar.classList.remove('show');
+    });
+    
+    xhr.open('POST', '{{ url_for("upload_document") }}');
+    xhr.send(formData);
+    
+  } catch (error) {
+    errorAlert.textContent = '✗ Error: ' + error.message;
+    errorAlert.classList.add('show');
+    submitBtn.disabled = false;
+  }
+});
+</script>
+{% endblock %}

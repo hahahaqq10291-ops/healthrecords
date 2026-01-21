@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pending Approval - Student Health Record Management System</title>
+    <!-- Boxicons CSS -->
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/pending_approval.css') }}"
+    />
+  </head>
+
+  <body>
+    <div class="pending-approval-container">
+      <div class="pending-card">
+        <div class="pending-header">
+          <h1>LYFJSHS</h1>
+          <h3>Account Pending Review</h3>
+          <p>Wait for admin to assign your role</p>
+        </div>
+
+        <div class="pending-content">
+          <div class="pending-icon">⏳</div>
+
+          <div class="pending-message">
+            Your account has been created successfully! An administrator will
+            review and assign an appropriate role to your account.
+          </div>
+
+          <div class="pending-info">
+            <div class="info-row">
+              <span class="info-label">👤 Name:</span>
+              <span class="info-value">{{ user.fullname }}</span>
+            </div>
+             {% if user.advisory_class %}
+            <div class="info-row">
+              <span class="info-label">🎓 Advisory Class:</span>
+              <span class="info-value">{{ user.advisory_class }}</span>
+            </div>
+            {% endif %}
+            <div class="info-row">
+              <span class="info-label">📧 Email:</span>
+              <span class="info-value">{{ user.email }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">📅 Registered:</span>
+              <span class="info-value">{{ user.created_at }}</span>
+            </div>
+          </div>
+
+          <p class="pending-note">
+            ℹ️ You cannot access the dashboard until an administrator assigns
+            you a role. This is for security purposes.
+          </p>
+
+          <a href="{{ url_for('logout') }}" class="btn-logout">← Logout</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
